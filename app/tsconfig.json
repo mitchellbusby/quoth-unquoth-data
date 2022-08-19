@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "jsxImportSource": "@emotion/react",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx"
+  }
+}

@@ -1,22 +1,7 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { OpenLayersMap } from "./OpenLayersMap";
 
 const App = () => {
-  const [state, setState] = useState<string | undefined>();
-
-  useEffect(() => {
-    const fetchState = async () => {
-      const result = await fetch("/api/");
-
-      const newState = await result.text();
-
-      setState(newState);
-    };
-
-    fetchState();
-  }, []);
-
   return (
     <div>
       <OpenLayersMap />
@@ -25,5 +10,5 @@ const App = () => {
 };
 
 export default function mountApp(mountElement: HTMLElement) {
-  ReactDOM.render(<App />, mountElement);
+  ReactDOM.createRoot(mountElement).render(<App />);
 }
