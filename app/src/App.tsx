@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import { OpenLayersMap } from "./OpenLayersMap";
 
 const App = () => {
@@ -25,5 +25,5 @@ const App = () => {
 };
 
 export default function mountApp(mountElement: HTMLElement) {
-  ReactDOM.render(<App />, mountElement);
+  ReactDOM.createRoot(mountElement).render(<App />);
 }
