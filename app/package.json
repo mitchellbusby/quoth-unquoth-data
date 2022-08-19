@@ -8,13 +8,20 @@
     "build": "yarn install && parcel build src/index.html --public-url /dist"
   },
   "dependencies": {
+    "@emotion/babel-plugin": "^11.10.0",
+    "@emotion/css": "^11.10.0",
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@parcel/transformer-less": "2.7.0",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "ol": "^7.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@parcel/transformer-less": "2.7.0",
     "parcel": "^2.7.0",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.0"
   }
 }
