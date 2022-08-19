@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { OpenLayersMap } from "./OpenLayersMap";
 
 const App = () => {
   const [state, setState] = useState<string | undefined>();
@@ -16,7 +17,11 @@ const App = () => {
     fetchState();
   }, []);
 
-  return <div>{state ? state : "loading..."}</div>;
+  return (
+    <div>
+      <OpenLayersMap />
+    </div>
+  );
 };
 
 export default function mountApp(mountElement: HTMLElement) {
