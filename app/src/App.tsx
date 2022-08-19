@@ -13,13 +13,14 @@ const Controls = styled.div({
   bottom: "var(--space-s)",
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
+  padding: "var(--space-s)",
 });
 
 const App = () => {
   return (
     <div>
       <OpenLayersMap />
-      <Controls>controls</Controls>
+      <Controls>Controls</Controls>
     </div>
   );
 };
