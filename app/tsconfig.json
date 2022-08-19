@@ -2,6 +2,8 @@
   "compilerOptions": {
     "jsxImportSource": "@emotion/react",
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "lib": ["es2017"]
   }
 }

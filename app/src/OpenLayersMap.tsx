@@ -13,6 +13,19 @@ import Stroke from "ol/style/Stroke";
 import { Style, Circle, Icon } from "ol/style";
 import CircleStyle from "ol/style/Circle";
 
+import busRoutes from "./data/stop_times.json";
+import stops from "./data/stops.json";
+
+function interpolate(a: Coordinate, b: Coordinate, frac: number) {
+  var nx = a[0] + (b[0] - a[0]) * frac;
+  var ny = a[1] + (b[1] - a[1]) * frac;
+  return [nx, ny];
+}
+
+function getStopLocation(stopId: number) {
+  return [stops[stopId].lon, stops[stopId].lat];
+}
+
 const OpenLayersMap = () => {
   const mapRef = createRef<HTMLDivElement>();
 
@@ -58,22 +71,41 @@ const OpenLayersMap = () => {
       }),
     });
 
+    let framecount = 0;
+
     buses.on("postrender", (event) => {
       const vectorContext = getVectorContext(event);
       const frameState = event.frameState;
       const theta = (2 * Math.PI * (frameState?.time || 0)) / omegaTheta;
-      const coordinates: number[][] = [];
-      let i;
-      for (i = 0; i < n; ++i) {
-        const t = theta + (2 * Math.PI * i) / n;
-        const x = (R + r) * Math.cos(t) + p * Math.cos(((R + r) * t) / r);
-        const y = (R + r) * Math.sin(t) + p * Math.sin(((R + r) * t) / r);
-        coordinates.push([center[0] + x / 1000, center[1] + y / 1000]);
-      }
+      const coordinates = Object.entries(busRoutes)
+        .map(([route, { stops, times }]) => {
+          const where = times.filter((time) => framecount >= time);
+          if (where.length > 0 && where.length < times.length) {
+            const [startTime, endTime] = [
+              times[where.length - 1],
+              times[where.length],
+            ];
+            const [startLoc, endLoc] = [
+              getStopLocation(stops[where.length - 1]),
+              getStopLocation(stops[where.length]),
+            ];
+            return fromLatLon(
+              interpolate(
+                startLoc,
+                endLoc,
+                (framecount - startTime) / (endTime - startTime)
+              )
+            );
+          }
+          return undefined;
+        })
+        .filter((x) => x);
+
       vectorContext.setStyle(imageStyle);
       vectorContext.drawGeometry(new MultiPoint(coordinates));
 
       map.render();
+      framecount = (framecount + 1) % (24 * 60 * 60);
     });
     map.render();
 
