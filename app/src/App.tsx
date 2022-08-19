@@ -3,23 +3,23 @@ import ReactDOM from "react-dom/client";
 import { OpenLayersMap } from "./OpenLayersMap";
 
 const App = () => {
-  const [state, setState] = useState<string | undefined>();
-
-  useEffect(() => {
-    const fetchState = async () => {
-      const result = await fetch("/api/");
-
-      const newState = await result.text();
-
-      setState(newState);
-    };
-
-    fetchState();
-  }, []);
-
   return (
     <div>
       <OpenLayersMap />
+      <div
+        style={{
+          background: "white",
+          width: "200px",
+          height: "200px",
+          position: "fixed",
+          right: "var(--space-s)",
+          bottom: "var(--space-s)",
+          borderRadius: "var(--surface-border-radius)",
+          boxShadow: "var(--shadow-elevation-medium)",
+        }}
+      >
+        controls
+      </div>
     </div>
   );
 };
