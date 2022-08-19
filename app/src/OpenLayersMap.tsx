@@ -57,12 +57,6 @@ const OpenLayersMap = () => {
       }),
     });
 
-    const n = 200;
-    const omegaTheta = 30000; // Rotation period in ms
-    const R = 7e6;
-    const r = 2e6;
-    const p = 2e6;
-
     const imageStyle = new Style({
       image: new CircleStyle({
         radius: 5,
@@ -75,10 +69,8 @@ const OpenLayersMap = () => {
 
     buses.on("postrender", (event) => {
       const vectorContext = getVectorContext(event);
-      const frameState = event.frameState;
-      const theta = (2 * Math.PI * (frameState?.time || 0)) / omegaTheta;
       const coordinates = Object.entries(busRoutes)
-        .map(([route, { stops, times }]) => {
+        .map(([, { stops, times }]) => {
           const where = times.filter((time) => framecount >= time);
           if (where.length > 0 && where.length < times.length) {
             const [startTime, endTime] = [
