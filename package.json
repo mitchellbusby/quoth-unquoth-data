@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "postinstall": "cd app && yarn start"
+    "postinstall": "cd app && yarn build"
   },
   "cacheDirectories": [
     "app/node_modules"
