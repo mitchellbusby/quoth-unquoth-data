@@ -112,7 +112,7 @@ const OpenLayersMap = () => {
     return () => {
       map.dispose();
     };
-  }, [mapRef]);
+  }, [mapRef.current]);
 
   return <div ref={mapRef} id="map"></div>;
 };
