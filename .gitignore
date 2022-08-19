@@ -1,0 +1,10 @@
+node_modules
+dist
+.cache
+yarn-error.log
+env
+.DS_Store
+.vscode
+.ipynb_checkpoints
+__pycache__
+.parcel-cache
