@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useState } from "react";
+import { BusList, BusType } from "./buses";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -12,10 +13,19 @@ const ControlsElement = styled.div(() => ({
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
   padding: "var(--space-s)",
-  transition: "all 400ms ease",
+  transition: "transform 400ms ease",
+  display: "flex",
+  flexDirection: "column",
+  gap: "var(--space-m)",
 }));
 
-export const Controls = () => {
+export const Controls = ({
+  selectedBus,
+  onSelectBus,
+}: {
+  selectedBus: BusType;
+  onSelectBus: (busType: BusType) => void;
+}) => {
   const [hidden, setHidden] = useState(false);
   return (
     <>
@@ -30,7 +40,28 @@ export const Controls = () => {
               `
         }
       >
-        Controls <button onClick={() => setHidden(true)}>Hide</button>
+        <div>
+          Controls <button onClick={() => setHidden(true)}>Hide</button>
+        </div>
+        <div
+          css={css`
+            display: flex;
+            gap: var(--space-xs);
+          `}
+        >
+          <label htmlFor="bus-select">Bus icon:</label>
+          <select
+            id="bus-select"
+            onChange={(event) => {
+              onSelectBus(event.target.value as BusType);
+            }}
+            value={selectedBus}
+          >
+            {BusList.map((bus) => (
+              <option value={bus.id}>{bus.label}</option>
+            ))}
+          </select>
+        </div>
       </ControlsElement>
       {hidden && (
         <div
