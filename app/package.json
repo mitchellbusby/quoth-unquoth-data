@@ -10,7 +10,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "yarn && parcel build src/index.html --public-url /dist"
+    "build": "yarn install && parcel build src/index.html --public-url /dist"
   },
   "dependencies": {
     "@types/react": "^18.0.17",
