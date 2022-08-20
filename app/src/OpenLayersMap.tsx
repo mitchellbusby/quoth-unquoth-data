@@ -254,6 +254,19 @@ const OpenLayersMap = () => {
             })
         )
       );
+
+      /**
+       * If there's no matching trip ID anymore, clear
+       * the popup.
+       */
+      if (
+        popup.get("tripId") &&
+        !busesSource
+          .getFeatures()
+          .find((f) => f.get("tripId") === popup.get("tripId"))
+      ) {
+        popup.setPosition(undefined);
+      }
     };
 
     const drawBusStopLayer = () => {
