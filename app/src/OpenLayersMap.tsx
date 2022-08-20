@@ -1,4 +1,10 @@
-import React, { createRef, useContext, useEffect, useState } from "react";
+import React, {
+  createRef,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
@@ -51,19 +57,7 @@ const busTypes = {
 };
 import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
-
-const days = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-const specialDays = ["Saturday", "Sunday"];
-const secondsInADay = 24 * 60 * 60;
-const secondsInAWeek = 7 * secondsInADay;
+import { isSpecialDay } from "./timeConfiguration";
 
 const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 function hashCode(value: string) {
@@ -118,7 +112,7 @@ const processedStops = Object.fromEntries(
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
-  const mapRef = createRef<HTMLDivElement>();
+  const mapRef = useRef<HTMLDivElement>();
   const [timeOfDay, setTimeOfDay] = useState<number>(0);
   useEffect(() => {
     appState.frameCount = timeOfDay;
@@ -155,7 +149,7 @@ const OpenLayersMap = () => {
           }
 
           const image = style.getImage();
-          image.setRotation(rotation);
+          //image.setRotation(rotation);
 
           return style;
         }
@@ -184,7 +178,7 @@ const OpenLayersMap = () => {
             url: "https://a.tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38",
           }),
         }),
-        osmCyclingLayer,
+        // osmCyclingLayer,
         busStopLayer,
         busesLayer,
       ],
@@ -198,6 +192,16 @@ const OpenLayersMap = () => {
       const timeOfDay = appState.frameCount;
 
       const coordinates = Object.entries(processedStops)
+        .filter(([tripId]) => {
+          // check day of the week first
+          if (isSpecialDay(appState.dayOfWeek)) {
+            // check that it includes the specific day
+            return tripId.includes(appState.dayOfWeek);
+          } else {
+            // check if its a weekday trip
+            return tripId.includes("Weekday");
+          }
+        })
         .map(([tripId, { stops, times }]) => {
           const where = times.filter((time) => timeOfDay >= time);
           if (where.length > 0 && where.length < times.length) {
@@ -256,7 +260,7 @@ const OpenLayersMap = () => {
       );
     };
 
-    busesLayer.on("postrender", (event) => {
+    map.on("postrender", () => {
       drawAnimatedBusesFrame();
       map.render();
     });
