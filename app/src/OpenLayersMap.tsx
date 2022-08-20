@@ -8,7 +8,7 @@ import React, {
 import { Feature, Map, Overlay, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
-import { transform } from "ol/proj";
+import { fromLonLat, transform } from "ol/proj";
 import { Coordinate } from "ol/coordinate";
 import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
@@ -61,6 +61,9 @@ import { isSpecialDay } from "./timeConfiguration";
 import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
 import { CreateRouteContext } from "./CreateEditRoutes";
 import { StyleLike } from "ol/style/Style";
+import { BusStopLayer } from "./Layers/BusStopLayer";
+import { FeatureType } from "./FeatureType";
+import { getStopLocation } from "./utils/getStopLocation";
 
 const busStopStyle: StyleLike = (feature, resolution) => {
   console.log(resolution);
@@ -86,10 +89,6 @@ function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   return [nx, ny];
 }
 
-function getStopLocation(stopId: number) {
-  return [stops[stopId].lon, stops[stopId].lat];
-}
-
 const processedStops = Object.fromEntries(
   Object.entries(busTrips).map(([tripId, { stops, times }]) => {
     const newTimes = [];
@@ -108,11 +107,6 @@ const processedStops = Object.fromEntries(
     return [tripId, { stops, times: newTimes }];
   })
 );
-
-enum FeatureType {
-  Bus = "bus",
-  BusStop = "busstop",
-}
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
@@ -167,12 +161,7 @@ const OpenLayersMap = () => {
       },
     });
 
-    const busStopSource = new VectorSource();
-    const busStopLayer = new VectorLayer({
-      source: busStopSource,
-      style: busStopStyle,
-      minZoom: 14,
-    });
+    const busStopLayer = new BusStopLayer();
 
     const osmCyclingLayer = new TileLayer({
       source: new OSM({
@@ -190,7 +179,7 @@ const OpenLayersMap = () => {
           }),
         }),
         // osmCyclingLayer,
-        busStopLayer,
+        busStopLayer.layer,
         busesLayer,
       ],
       view: new View({
@@ -279,32 +268,19 @@ const OpenLayersMap = () => {
       }
     };
 
-    const drawBusStopLayer = () => {
-      const features = Object.keys(stops).map((stop) => {
-        const stopLocation = getStopLocation(parseInt(stop));
-        const stopName = stops[stop].name;
-
-        return new Feature({
-          geometry: new Point(fromLonLat(stopLocation)),
-          type: FeatureType.BusStop,
-          stopId: stop,
-          stopName,
-        });
-      });
-      busStopSource.addFeatures(features);
-    };
-
     const popup = new Overlay({
       element: popupRef.current,
     });
 
     map.addOverlay(popup);
     map.on("postrender", () => {
+      busStopLayer.draw();
+
       drawAnimatedBusesFrame();
       map.render();
     });
 
-    drawBusStopLayer();
+    busStopLayer.draw();
     drawAnimatedBusesFrame();
     map.render();
 
@@ -357,11 +333,4 @@ const OpenLayersMap = () => {
   );
 };
 
-const fromLonLat = (coordinates: Coordinate, opt_projection?: string) => {
-  return transform(
-    coordinates,
-    "EPSG:4326",
-    opt_projection !== undefined ? opt_projection : "EPSG:3857"
-  );
-};
 export { OpenLayersMap };
