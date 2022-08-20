@@ -115,11 +115,15 @@ const CreateEditRoutes = () => {
 const formatStopString = (stopId: string) =>
   `${stops[stopId].name} (${stopId})`;
 type SavedRoute = {
-  // todo: align fields to be with what the app has
   stops: {
     stopId: string;
   }[];
   name: string;
+  /**
+   * todo: align fields to be with what the rest of the app has:
+   * - bus frequency support
+   * - start / end times support
+   */
 };
 
 type CreatedRoute = {
@@ -132,7 +136,7 @@ type CreatedRoute = {
 
 type CreateRouteAction =
   | {
-      type: "start" | "finish" | "cancel";
+      type: "finish" | "cancel";
     }
   | { type: "start"; routeName?: string }
   | { type: "add-stop"; stop: { stopId: string; name: string } }
@@ -146,7 +150,7 @@ export function createRouteReducer(
     case "start": {
       return {
         stops: [],
-        routeName: `Untitled route`,
+        routeName: action.routeName ?? `Untitled route`,
       };
     }
     case "add-stop": {
