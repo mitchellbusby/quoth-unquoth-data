@@ -21,7 +21,7 @@ const ControlsElement = styled.div(() => ({
   top: "var(--space-s)",
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
-  padding: "var(--space-s)",
+  padding: "var(--space-m)",
   transition: "transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);",
   display: "flex",
   flexDirection: "column",
@@ -60,7 +60,7 @@ export const Controls = () => {
               `
         }
       >
-        <div css={{ display: "flex" }}>
+        <div css={{ display: "flex", alignItems: "center" }}>
           Controls{" "}
           <Button
             onClick={() => setHidden(true)}
