@@ -1,14 +1,12 @@
-export type BusType = "bus" | "bus_old" | "bus_pride" | "bus_blue";
+export type BusDistributionType = "standard" | "pride";
 
-export const BusList: { label: string; id: BusType }[] = [
-  { label: "Standard bus", id: "bus" },
-  { label: "Old bus", id: "bus_old" },
+export const BusList: { label: string; id: BusDistributionType }[] = [
   {
-    label: "Pride bus",
-    id: "bus_pride",
+    label: "Standard bus distribution",
+    id: "standard",
   },
   {
-    label: "Blue bus",
-    id: "bus_blue",
+    label: "PRIDE MODE ON",
+    id: "pride",
   },
 ];
