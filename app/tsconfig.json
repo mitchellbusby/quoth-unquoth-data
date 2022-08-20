@@ -4,6 +4,6 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "lib": ["es2017"]
+    "lib": ["es2017", "DOM"]
   }
 }
