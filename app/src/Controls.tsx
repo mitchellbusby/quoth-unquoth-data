@@ -53,7 +53,7 @@ export const Controls = () => {
         css={
           hidden
             ? css`
-                transform: translateX(324px);
+                transform: translateX(calc(332px + 8px));
               `
             : css`
                 transform: none;
