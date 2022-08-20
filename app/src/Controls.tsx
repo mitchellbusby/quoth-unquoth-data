@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useState } from "react";
 import { BusList, BusType } from "./buses";
+import { Button } from "./components/Button";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -41,7 +42,10 @@ export const Controls = ({
         }
       >
         <div>
-          Controls <button onClick={() => setHidden(true)}>Hide</button>
+          Controls{" "}
+          <Button onClick={() => setHidden(true)} size={"small"}>
+            Hide
+          </Button>
         </div>
         <div
           css={css`
