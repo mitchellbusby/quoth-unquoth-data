@@ -272,9 +272,12 @@ const OpenLayersMap = () => {
 
     map.on("click", function (evt) {
       map.forEachFeatureAtPixel(evt.pixel, (feature) => {
-        //check the feature type omg
-        popup.setPosition((feature.getGeometry() as Point).getCoordinates());
-        popup.getElement().innerText = feature.getProperties().tripId;
+        //check the feature type before doing the thing
+
+        if (feature.get("type") === "bus") {
+          popup.setPosition((feature.getGeometry() as Point).getCoordinates());
+          popup.getElement().innerText = feature.getProperties().tripId;
+        }
       });
     });
 
