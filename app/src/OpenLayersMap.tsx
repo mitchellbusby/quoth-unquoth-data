@@ -1,4 +1,10 @@
-import React, { createRef, useContext, useEffect, useState } from "react";
+import React, {
+  createRef,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
@@ -87,7 +93,7 @@ function getStopLocation(stopId: number) {
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
-  const mapRef = createRef<HTMLDivElement>();
+  const mapRef = useRef<HTMLDivElement>();
   const [timeOfDay, setTimeOfDay] = useState<number>(0);
   useEffect(() => {
     appState.frameCount = timeOfDay;
