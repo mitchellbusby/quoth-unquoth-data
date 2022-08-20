@@ -1,10 +1,13 @@
 import { cloneDeep, remove } from "lodash";
+import { fromLonLat } from "ol/proj";
 import React, { createContext, useContext, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
+import { AppStateContext } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 
 const CreateEditRoutes = () => {
+  const appState = useContext(AppStateContext);
   const [state, dispatch] = useContext(CreateRouteContext);
   const [savedRoutes, setSavedRoutes] = useLocalStorage<{
     routes: SavedRoute[];
@@ -97,7 +100,22 @@ const CreateEditRoutes = () => {
                   </div>
                   <ol>
                     {route.stops.map((stop) => (
-                      <div>{formatStopString(stop.stopId)}</div>
+                      <div>
+                        {formatStopString(stop.stopId)}{" "}
+                        <Button
+                          onClick={() => {
+                            const stopLatLon = getStopLocation(
+                              parseInt(stop.stopId)
+                            );
+                            appState.olMapRef?.current?.getView().animate({
+                              zoom: 18,
+                              center: fromLonLat(stopLatLon),
+                            });
+                          }}
+                        >
+                          Center
+                        </Button>
+                      </div>
                     ))}
                   </ol>
                 </div>
@@ -111,6 +129,10 @@ const CreateEditRoutes = () => {
     </div>
   );
 };
+
+function getStopLocation(stopId: number) {
+  return [stops[stopId].lon, stops[stopId].lat];
+}
 
 const formatStopString = (stopId: string) =>
   `${stops[stopId].name} (${stopId})`;
