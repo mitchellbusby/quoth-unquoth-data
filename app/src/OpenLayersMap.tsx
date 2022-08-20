@@ -15,6 +15,19 @@ import CircleStyle from "ol/style/Circle";
 
 import busRoutes from "./data/stop_times.json";
 import stops from "./data/stops.json";
+import VectorLayer from "ol/layer/Vector";
+import Bus from "./static/bus.png";
+
+const busImageStyle = new Style({
+  // image: new CircleStyle({
+  //   radius: 5,
+  //   fill: new Fill({ color: "yellow" }),
+  //   stroke: new Stroke({ color: "red", width: 1 }),
+  // }),
+  image: new Icon({
+    src: Bus,
+  }),
+});
 
 function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   var nx = a[0] + (b[0] - a[0]) * frac;
@@ -62,7 +75,13 @@ const OpenLayersMap = () => {
 
     const center = fromLatLon([149.049675, -35.344625]);
 
-    const buses = new TileLayer({
+    const busesSource = new VectorSource();
+    const busesLayer = new VectorLayer({
+      source: busesSource,
+      style: busImageStyle,
+    });
+
+    const osmCyclingLayer = new TileLayer({
       source: new OSM({
         url: "https://b.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png",
         opaque: false,
@@ -75,7 +94,8 @@ const OpenLayersMap = () => {
         new TileLayer({
           source: new OSM(),
         }),
-        buses,
+        osmCyclingLayer,
+        busesLayer,
       ],
       view: new View({
         center: center,
@@ -83,17 +103,9 @@ const OpenLayersMap = () => {
       }),
     });
 
-    const imageStyle = new Style({
-      image: new CircleStyle({
-        radius: 5,
-        fill: new Fill({ color: "yellow" }),
-        stroke: new Stroke({ color: "red", width: 1 }),
-      }),
-    });
-
-    buses.on("postrender", (event) => {
+    const drawAnimatedBusesFrame = () => {
       const timeOfDay = framecount;
-      const vectorContext = getVectorContext(event);
+
       const coordinates = Object.entries(busRoutes)
         .map(([, { stops, times }]) => {
           const where = times.filter((time) => timeOfDay >= time);
@@ -118,12 +130,20 @@ const OpenLayersMap = () => {
         })
         .filter((x) => x);
 
-      vectorContext.setStyle(imageStyle);
-      vectorContext.drawGeometry(new MultiPoint(coordinates));
+      busesSource.clear();
+      busesSource.addFeatures(
+        coordinates.map((m) => new Feature({ geometry: new Point(m) }))
+      );
+    };
 
-      map.render();
+    busesLayer.on("postrender", (event) => {
+      drawAnimatedBusesFrame();
+
       setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
+      map.render();
     });
+
+    drawAnimatedBusesFrame();
     map.render();
 
     return () => {
