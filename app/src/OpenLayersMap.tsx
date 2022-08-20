@@ -165,7 +165,7 @@ const OpenLayersMap = () => {
             url: "https://a.tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38",
           }),
         }),
-        osmCyclingLayer,
+        // osmCyclingLayer,
         busStopLayer,
         busesLayer,
       ],
