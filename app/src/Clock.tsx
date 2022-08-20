@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { AppStateContext } from "./AppState";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
+import { Button } from "./components/Button";
 
 const Clock = () => {
   const appState = useContext(AppStateContext);
@@ -20,6 +21,10 @@ const Clock = () => {
     return date.toFormat("HH:mm a");
   }, [timeOfDay]);
 
+  const makeHandleTimeTravelClick = (delta: number) => () => {
+    setTimeOfDay(timeOfDay + delta);
+  };
+
   return (
     <div
       css={{
@@ -36,6 +41,15 @@ const Clock = () => {
     >
       <div>Time of day</div>
       <div>{timeString}</div>
+      <div
+        css={{
+          display: "flex",
+          gap: "4px",
+        }}
+      >
+        <Button onClick={makeHandleTimeTravelClick(-10 * 60)}>-10m</Button>
+        <Button onClick={makeHandleTimeTravelClick(10 * 60)}>+10m</Button>
+      </div>
     </div>
   );
 };
