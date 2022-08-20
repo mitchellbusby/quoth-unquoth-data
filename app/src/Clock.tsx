@@ -158,6 +158,7 @@ const Clock = () => {
           borderRadius: 8,
           boxShadow: "var(--shadow-elevation-medium)",
           height: "fit-content",
+          zIndex: 1,
         }}
       >
         <Select
