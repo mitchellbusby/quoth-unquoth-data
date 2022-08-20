@@ -8,7 +8,7 @@ type AppState = {
   busDistribution: BusDistributionType;
 };
 
-const appState = {
+const appState: AppState = {
   frameCount: 9 * 60 * 60,
   dayOfWeek: DEFAULT_DAY,
   busDistribution: "standard",
