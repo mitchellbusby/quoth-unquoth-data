@@ -23,6 +23,8 @@ const START_OF_DAY_IN_MINUTES = 9 * 60 * 60;
 const secondsInADay = 24 * 60 * 60;
 const secondsInAWeek = 7 * secondsInADay;
 
+let lastTick = Date.now();
+
 const Clock = () => {
   const [clockScale, setClockScale] = useLocalStorage<"small" | "large">(
     "clockscale",
@@ -34,11 +36,13 @@ const Clock = () => {
 
   requestAnimationFrame(() => {
     setTimeOfDay((timeOfDay) => {
-      const nextTimeOfDay = timeOfDay + 1;
+      const tick = Date.now();
+      const nextTimeOfDay = timeOfDay + (tick - lastTick) / 16;
+      lastTick = tick;
 
       const overflow = nextTimeOfDay % (24 * 60 * 60);
 
-      if (overflow === 0) {
+      if (overflow < timeOfDay) {
         setDayOfWeek(getNextDay(dayOfWeek));
       }
 
