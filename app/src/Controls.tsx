@@ -32,7 +32,7 @@ const ControlsElement = styled.div(() => ({
 }));
 
 export const Controls = () => {
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(false);
 
   const [selectedBusDistribution, setSelectedBus] =
     useLocalStorage<BusDistributionType>(
