@@ -7,12 +7,17 @@ import { css } from "@emotion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDownLeftAndUpRightToCenter,
-  faMinimize,
   faUpRightAndDownLeftFromCenter,
 } from "@fortawesome/free-solid-svg-icons";
+import { useLocalStorage } from "usehooks-ts";
+
+const breakpointForRadialClock = "768px";
 
 const Clock = () => {
-  const [clockScale, setClockScale] = useState<"small" | "large">();
+  const [clockScale, setClockScale] = useLocalStorage<"small" | "large">(
+    "clockscale",
+    "large"
+  );
   const appState = useContext(AppStateContext);
   const [timeOfDay, setTimeOfDay] = useState<number>(0);
 
@@ -50,7 +55,9 @@ const Clock = () => {
     >
       <div
         css={{
-          position: "relative",
+          [`@media (max-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
         }}
       >
         <CircularSlider
@@ -85,11 +92,24 @@ const Clock = () => {
           }
         />
       </div>
+      <div
+        css={{
+          [`@media (min-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
+        }}
+      >
+        <div>Current time</div>
+        <div>{timeString}</div>
+      </div>
       <Button
         css={{
           position: "absolute",
           bottom: "4px",
           right: "4px",
+          [`@media (max-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
         }}
         size="small"
         onClick={() => {
