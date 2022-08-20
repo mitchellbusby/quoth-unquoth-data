@@ -52,19 +52,6 @@ const busTypes = {
 import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
 
-const days = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-const specialDays = ["Saturday", "Sunday"];
-const secondsInADay = 24 * 60 * 60;
-const secondsInAWeek = 7 * secondsInADay;
-
 const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 function hashCode(value: string) {
   var hash = 0,
