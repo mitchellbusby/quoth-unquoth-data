@@ -330,6 +330,7 @@ const OpenLayersMap = () => {
           background: "white",
           padding: 8,
           borderRadius: 8,
+          boxShadow: "var(--shadow-elevation-low)",
         }}
         ref={popupRef}
       ></div>
