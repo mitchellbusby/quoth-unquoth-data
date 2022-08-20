@@ -16,19 +16,25 @@ const Clock = () => {
   var date = new Date(0);
   date.setSeconds(timeOfDay);
   var timeString = date.toISOString().substr(11, 5);
+
+  // start making it better
+
   return (
     <div
       css={{
         background: "white",
         position: "fixed",
-        left: 32,
-        top: 32,
+        left: 32 + 8,
+        top: 8,
         padding: 32,
         borderRadius: 8,
         boxShadow: "var(--shadow-elevation-medium)",
+        display: "grid",
+        gap: "4px",
       }}
     >
-      {timeString}
+      <div>Time of day</div>
+      <div>{timeString}</div>
     </div>
   );
 };
