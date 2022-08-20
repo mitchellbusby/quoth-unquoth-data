@@ -51,6 +51,7 @@ const busTypes = {
 };
 import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
+import { isSpecialDay } from "./timeConfiguration";
 
 const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 function hashCode(value: string) {

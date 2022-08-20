@@ -17,7 +17,7 @@ const breakpointForRadialClock = "768px";
 /**
  * Start of day from UTC
  */
-const START_OF_DAY_IN_MINUTES = 3 * 60 * 60;
+const START_OF_DAY_IN_MINUTES = 9 * 60 * 60;
 
 const secondsInADay = 24 * 60 * 60;
 const secondsInAWeek = 7 * secondsInADay;
