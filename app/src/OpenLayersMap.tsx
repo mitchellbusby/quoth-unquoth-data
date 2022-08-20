@@ -2,6 +2,7 @@ import React, {
   createRef,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -59,7 +60,7 @@ import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
 import { isSpecialDay } from "./timeConfiguration";
 import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
-import { CreateRouteContext } from "./CreateEditRoutes";
+import { CreateRouteContext, SavedRoute } from "./CreateEditRoutes";
 import { StyleLike } from "ol/style/Style";
 import { BusStopLayer } from "./Layers/BusStopLayer";
 import { FeatureType } from "./FeatureType";
@@ -89,27 +90,37 @@ function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   return [nx, ny];
 }
 
-const processedStops = Object.fromEntries(
-  Object.entries(busTrips).map(([tripId, { stops, times }]) => {
-    const newTimes = [];
-    let prevTime = undefined;
-    for (let t of times) {
-      if (t <= 3 * 60 * 60) {
-        t += 24 * 60 * 60;
+/**
+ * Gets all trips, and return wrapped values.
+ */
+const getProcessedStops = (savedRoutes: SavedRoute[]) => {
+  return Object.fromEntries(
+    Object.entries(busTrips).map(([tripId, { stops, times }]) => {
+      const newTimes = [];
+      let prevTime = undefined;
+      for (let t of times) {
+        if (t <= 3 * 60 * 60) {
+          t += 24 * 60 * 60;
+        }
+        if (prevTime !== undefined && prevTime === t) {
+          newTimes.push(t + 25 + Math.random() * 10);
+        } else {
+          newTimes.push(t - Math.random() * 30);
+        }
+        prevTime = t;
       }
-      if (prevTime !== undefined && prevTime === t) {
-        newTimes.push(t + 25 + Math.random() * 10);
-      } else {
-        newTimes.push(t - Math.random() * 30);
-      }
-      prevTime = t;
-    }
-    return [tripId, { stops, times: newTimes }];
-  })
-);
+      return [tripId, { stops, times: newTimes }];
+    })
+  );
+};
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
+  const processedStops = useMemo(
+    () => getProcessedStops(appState.savedBusRoutes.routes),
+    [appState.savedBusRoutes]
+  );
+
   const [_, dispatchCreateRouteUpdate] = useContext(CreateRouteContext);
   const mapRef = useRef<HTMLDivElement>();
   const popupRef = useRef<HTMLDivElement>();
@@ -319,6 +330,7 @@ const OpenLayersMap = () => {
   useEffect(() => {
     appState.olMapRef = olMapRef;
   }, [olMapRef.current]);
+
   return (
     <>
       <div ref={mapRef} id="map"></div>
