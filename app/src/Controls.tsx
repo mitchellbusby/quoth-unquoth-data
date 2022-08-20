@@ -6,11 +6,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
+import { CSSTransition } from "react-transition-group";
 import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
 import { Select } from "./components/Select";
+import { ClassNames } from "@emotion/react";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -92,29 +94,59 @@ export const Controls = () => {
           </Select>
         </div>
       </ControlsElement>
-      {hidden && (
-        <div
-          css={css`
-            position: fixed;
-            top: 8px;
-            right: 8px;
-          `}
-        >
-          <Button
-            css={{
-              padding: 16,
-            }}
-            onClick={() => {
-              setHidden(false);
+      <ClassNames>
+        {({ css }) => (
+          <CSSTransition
+            in={hidden}
+            mountOnEnter
+            unmountOnExit
+            timeout={200}
+            classNames={{
+              enterActive: css({
+                transform: "none",
+                opacity: 1,
+                transition: "all 200ms",
+              }),
+              enter: css({
+                transform: "scale(0.5)",
+                opacity: 0,
+              }),
+              exit: css({
+                transform: "none",
+                opacity: 1,
+              }),
+              exitActive: css({
+                transform: "scale(0.5)",
+                opacity: 0,
+                transition: "all 200ms",
+              }),
             }}
           >
-            <FontAwesomeIcon
-              icon={faWandMagicSparkles}
-              size="lg"
-            ></FontAwesomeIcon>
-          </Button>
-        </div>
-      )}
+            <div
+              css={css`
+                position: fixed;
+                top: 8px;
+                right: 8px;
+                z-index: 10000;
+              `}
+            >
+              <Button
+                css={{
+                  padding: 16,
+                }}
+                onClick={() => {
+                  setHidden(false);
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faWandMagicSparkles}
+                  size="lg"
+                ></FontAwesomeIcon>
+              </Button>
+            </div>
+          </CSSTransition>
+        )}
+      </ClassNames>
     </>
   );
 };
