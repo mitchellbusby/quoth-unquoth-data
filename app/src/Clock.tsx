@@ -10,7 +10,8 @@ import {
   faUpRightAndDownLeftFromCenter,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocalStorage } from "usehooks-ts";
-import { days, DEFAULT_DAY } from "./timeConfiguration";
+import { days, DEFAULT_DAY, getNextDay } from "./timeConfiguration";
+import { Select } from "./components/Select";
 
 const breakpointForRadialClock = "768px";
 
@@ -32,9 +33,17 @@ const Clock = () => {
   const [dayOfWeek, setDayOfWeek] = useState<string>(DEFAULT_DAY);
 
   requestAnimationFrame(() => {
-    // todo: if there's a remainder, we need to roll over to the next day; and then wrap around AGAIN
-    // at the end of the week.
-    setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
+    setTimeOfDay((timeOfDay) => {
+      const nextTimeOfDay = timeOfDay + 1;
+
+      const overflow = nextTimeOfDay % (24 * 60 * 60);
+
+      if (overflow === 0) {
+        setDayOfWeek(getNextDay(dayOfWeek));
+      }
+
+      return overflow;
+    });
   });
 
   useEffect(() => {
@@ -147,7 +156,7 @@ const Clock = () => {
           height: "fit-content",
         }}
       >
-        <select
+        <Select
           value={dayOfWeek}
           onChange={(event) => {
             setDayOfWeek(event.target.value);
@@ -158,7 +167,7 @@ const Clock = () => {
               {day}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
     </div>
   );

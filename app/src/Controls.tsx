@@ -10,6 +10,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
+import { Select } from "./components/Select";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -20,7 +21,7 @@ const ControlsElement = styled.div(() => ({
   top: "var(--space-s)",
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
-  padding: "var(--space-s)",
+  padding: "var(--space-m)",
   transition: "transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);",
   display: "flex",
   flexDirection: "column",
@@ -52,19 +53,19 @@ export const Controls = () => {
         css={
           hidden
             ? css`
-                transform: translateX(324px);
+                transform: translateX(calc(332px + 8px));
               `
             : css`
                 transform: none;
               `
         }
       >
-        <div css={{ display: "flex" }}>
+        <div css={{ display: "flex", alignItems: "center" }}>
           Controls{" "}
           <Button
             onClick={() => setHidden(true)}
             size={"small"}
-            css={{ marginLeft: "auto" }}
+            css={{ marginLeft: "auto", padding: "6px 12px" }}
           >
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
@@ -76,7 +77,7 @@ export const Controls = () => {
           `}
         >
           <label htmlFor="bus-select">Bus icon:</label>
-          <select
+          <Select
             id="bus-select"
             onChange={(event) => {
               handleChangeBusDistribution(
@@ -88,7 +89,7 @@ export const Controls = () => {
             {BusList.map((bus) => (
               <option value={bus.id}>{bus.label}</option>
             ))}
-          </select>
+          </Select>
         </div>
       </ControlsElement>
       {hidden && (
