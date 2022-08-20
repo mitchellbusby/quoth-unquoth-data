@@ -13,6 +13,7 @@ import stops from "./data/stops.json";
 import VectorLayer from "ol/layer/Vector";
 import { AppStateContext } from "./AppState";
 import { getBusStyle } from "./getBusStyle";
+import BusStop from "./static/stop.png";
 
 const days = [
   "Monday",
@@ -26,6 +27,8 @@ const days = [
 const specialDays = ["Saturday", "Sunday"];
 const secondsInADay = 24 * 60 * 60;
 const secondsInAWeek = 7 * secondsInADay;
+
+const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 
 function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   var nx = a[0] + (b[0] - a[0]) * frac;
@@ -61,6 +64,13 @@ const OpenLayersMap = () => {
       },
     });
 
+    const busStopSource = new VectorSource();
+    const busStopLayer = new VectorLayer({
+      source: busStopSource,
+      style: busStopStyle,
+      minZoom: 14,
+    });
+
     const osmCyclingLayer = new TileLayer({
       source: new OSM({
         url: "https://b.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png",
@@ -75,6 +85,7 @@ const OpenLayersMap = () => {
           source: new OSM(),
         }),
         osmCyclingLayer,
+        busStopLayer,
         busesLayer,
       ],
       view: new View({
@@ -131,11 +142,26 @@ const OpenLayersMap = () => {
       );
     };
 
+    const drawBusStopLayer = () => {
+      const coordinates = Object.keys(stops).map((stop) => {
+        return getStopLocation(parseInt(stop));
+      });
+      busStopSource.addFeatures(
+        coordinates.map(
+          (m) =>
+            new Feature({
+              geometry: new Point(fromLonLat(m)),
+            })
+        )
+      );
+    };
+
     busesLayer.on("postrender", (event) => {
       drawAnimatedBusesFrame();
       map.render();
     });
 
+    drawBusStopLayer();
     drawAnimatedBusesFrame();
     map.render();
 
