@@ -72,6 +72,9 @@ export function createRouteReducer(
       };
     }
     case "add-stop": {
+      if (!state) {
+        return undefined;
+      }
       const stops = [...state.stops];
       stops.push({ stopId: "jieufahsdfo" });
       return {
