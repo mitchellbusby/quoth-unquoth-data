@@ -15,7 +15,6 @@ import CircleStyle from "ol/style/Circle";
 
 import busRoutes from "./data/stop_times.json";
 import stops from "./data/stops.json";
-import { TimeOfDay } from "./TimeOfDay";
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
 import { AppStateContext } from "./AppState";
@@ -132,8 +131,6 @@ const OpenLayersMap = () => {
 
     busesLayer.on("postrender", (event) => {
       drawAnimatedBusesFrame();
-
-      setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
       map.render();
     });
 
@@ -148,7 +145,6 @@ const OpenLayersMap = () => {
   return (
     <>
       <div ref={mapRef} id="map"></div>
-      <TimeOfDay seconds={timeOfDay}></TimeOfDay>
     </>
   );
 };
