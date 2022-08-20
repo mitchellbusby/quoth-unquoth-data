@@ -104,6 +104,8 @@ const OpenLayersMap = () => {
   const mapRef = useRef<HTMLDivElement>();
   const popOverRef = useRef<HTMLDivElement>();
 
+  const olMapRef = useRef<Map>();
+
   useEffect(() => {
     if (!mapRef.current) {
       return;
@@ -180,6 +182,8 @@ const OpenLayersMap = () => {
         zoom: 15,
       }),
     });
+
+    olMapRef.current = map;
 
     const drawAnimatedBusesFrame = () => {
       const timeOfDay = appState.frameCount;
@@ -267,12 +271,10 @@ const OpenLayersMap = () => {
     map.render();
 
     map.on("click", function (evt) {
-      console.log(evt);
-      var feature = map.forEachFeatureAtPixel(evt.pixel, (evt) => {
-        console.log({ evt, popup });
-        console.log((evt.getGeometry() as Point).getCoordinates());
-        popup.setPosition((evt.getGeometry() as Point).getCoordinates());
-        popup.getElement().innerText = evt.getProperties().tripId;
+      map.forEachFeatureAtPixel(evt.pixel, (feature) => {
+        //check the feature type omg
+        popup.setPosition((feature.getGeometry() as Point).getCoordinates());
+        popup.getElement().innerText = feature.getProperties().tripId;
       });
     });
 
