@@ -4,8 +4,15 @@ import { AppStateContext } from "./AppState";
 import { DateTime } from "luxon";
 import { Button } from "./components/Button";
 import { css } from "@emotion/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faDownLeftAndUpRightToCenter,
+  faMinimize,
+  faUpRightAndDownLeftFromCenter,
+} from "@fortawesome/free-solid-svg-icons";
 
 const Clock = () => {
+  const [clockScale, setClockScale] = useState<"small" | "large">();
   const appState = useContext(AppStateContext);
   const [timeOfDay, setTimeOfDay] = useState<number>(0);
 
@@ -41,7 +48,11 @@ const Clock = () => {
         gap: "4px",
       }}
     >
-      <div>
+      <div
+        css={{
+          position: "relative",
+        }}
+      >
         <CircularSlider
           min={0}
           max={86400}
@@ -49,7 +60,8 @@ const Clock = () => {
             setTimeOfDay(value);
           }}
           dataIndex={timeOfDay}
-          width={150}
+          key={clockScale}
+          width={clockScale === "small" ? 150 : undefined}
           renderLabelValue={
             <div
               css={css`
@@ -65,7 +77,7 @@ const Clock = () => {
                 color: rgb(39, 43, 119);
                 user-select: none;
                 z-index: 1;
-                font-size: 24px;
+                font-size: ${clockScale === "small" ? 24 : 48}px;
               `}
             >
               {timeString}
@@ -73,6 +85,25 @@ const Clock = () => {
           }
         />
       </div>
+      <Button
+        css={{
+          position: "absolute",
+          bottom: "4px",
+          right: "4px",
+        }}
+        size="small"
+        onClick={() => {
+          setClockScale(clockScale === "small" ? "large" : "small");
+        }}
+      >
+        <FontAwesomeIcon
+          icon={
+            clockScale === "small"
+              ? faUpRightAndDownLeftFromCenter
+              : faDownLeftAndUpRightToCenter
+          }
+        />
+      </Button>
     </div>
   );
 };
