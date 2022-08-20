@@ -173,6 +173,16 @@ const OpenLayersMap = () => {
       const timeOfDay = appState.frameCount;
 
       const coordinates = Object.entries(busRoutes)
+        .filter(([tripId]) => {
+          // check day of the week first
+          if (isSpecialDay(appState.dayOfWeek)) {
+            // check that it includes the specific day
+            return tripId.includes(appState.dayOfWeek);
+          } else {
+            // check if its a weekday trip
+            return tripId.includes("Weekday");
+          }
+        })
         .map(([tripId, { stops, times }]) => {
           const where = times.filter((time) => timeOfDay >= time);
           if (where.length > 0 && where.length < times.length) {
@@ -231,7 +241,7 @@ const OpenLayersMap = () => {
       );
     };
 
-    busesLayer.on("postrender", (event) => {
+    map.on("postrender", () => {
       drawAnimatedBusesFrame();
       map.render();
     });
