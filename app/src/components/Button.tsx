@@ -21,6 +21,9 @@ const Button = styled.button((props: { size?: "small" | "medium" }) => ({
     backgroundColor: "#0b5ed7",
     bordercolor: "#0a58ca",
   },
+  ":focus-visible": {
+    outline: "1px solid blue",
+  },
 }));
 
 export { Button };
