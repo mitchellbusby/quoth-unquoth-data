@@ -97,6 +97,25 @@ function getStopLocation(stopId: number) {
   return [stops[stopId].lon, stops[stopId].lat];
 }
 
+const processedStops = Object.fromEntries(
+  Object.entries(busRoutes).map(([tripId, { stops, times }]) => {
+    const newTimes = [];
+    let prevTime = undefined;
+    for (let t of times) {
+      if (t <= 3 * 60 * 60) {
+        t += 24 * 60 * 60;
+      }
+      if (prevTime !== undefined && prevTime === t) {
+        newTimes.push(t + 25 + Math.random() * 10);
+      } else {
+        newTimes.push(t - Math.random() * 30);
+      }
+      prevTime = t;
+    }
+    return [tripId, { stops, times: newTimes }];
+  })
+);
+
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
   const mapRef = createRef<HTMLDivElement>();
@@ -178,7 +197,7 @@ const OpenLayersMap = () => {
     const drawAnimatedBusesFrame = () => {
       const timeOfDay = appState.frameCount;
 
-      const coordinates = Object.entries(busRoutes)
+      const coordinates = Object.entries(processedStops)
         .map(([tripId, { stops, times }]) => {
           const where = times.filter((time) => timeOfDay >= time);
           if (where.length > 0 && where.length < times.length) {
@@ -245,6 +264,13 @@ const OpenLayersMap = () => {
     drawBusStopLayer();
     drawAnimatedBusesFrame();
     map.render();
+
+    map.on("click", function (evt) {
+      console.log(evt);
+      var feature = map.forEachFeatureAtPixel(evt.pixel, (evt) =>
+        console.log(evt)
+      );
+    });
 
     return () => {
       map.dispose();
