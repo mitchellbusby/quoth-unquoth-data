@@ -282,11 +282,13 @@ const OpenLayersMap = () => {
     const drawBusStopLayer = () => {
       const features = Object.keys(stops).map((stop) => {
         const stopLocation = getStopLocation(parseInt(stop));
+        const stopName = stops[stop].name;
 
         return new Feature({
           geometry: new Point(fromLonLat(stopLocation)),
           type: FeatureType.BusStop,
           stopId: stop,
+          stopName,
         });
       });
       busStopSource.addFeatures(features);
@@ -324,7 +326,11 @@ const OpenLayersMap = () => {
 
         if (feature.get("type") === FeatureType.BusStop) {
           const stopId = feature.get("stopId");
-          dispatchCreateRouteUpdate({ type: "add-stop", stop: { stopId } });
+          const stopName = feature.get("stopName");
+          dispatchCreateRouteUpdate({
+            type: "add-stop",
+            stop: { stopId, name: stopName },
+          });
         }
       });
     });

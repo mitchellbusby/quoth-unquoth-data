@@ -1,4 +1,4 @@
-import { remove } from "lodash";
+import { cloneDeep, remove } from "lodash";
 import React, { createContext, useContext, useReducer } from "react";
 import { Button } from "./components/Button";
 
@@ -15,7 +15,7 @@ const CreateEditRoutes = () => {
             <ol>
               {state.stops.map((stop) => (
                 <li key={stop.stopId}>
-                  Stop {stop.stopId}{" "}
+                  Stop {stop.name} ({stop.stopId}){" "}
                   <Button
                     onClick={() => {
                       dispatch({ type: "remove-stop", stopId: stop.stopId });
@@ -68,6 +68,7 @@ type CreatedRoute = {
   // todo: align with what the app has
   stops: {
     stopId: string;
+    name: string;
   }[];
   routeName: string;
 };
@@ -76,7 +77,7 @@ type CreateRouteAction =
   | {
       type: "start" | "finish" | "cancel";
     }
-  | { type: "add-stop"; stop: { stopId: string } }
+  | { type: "add-stop"; stop: { stopId: string; name: string } }
   | { type: "remove-stop"; stopId: string };
 
 export function createRouteReducer(
@@ -95,7 +96,7 @@ export function createRouteReducer(
         return undefined;
       }
       const stops = [...state.stops];
-      stops.push({ stopId: action.stop.stopId });
+      stops.push(cloneDeep(action.stop));
       return {
         ...state,
         stops,
