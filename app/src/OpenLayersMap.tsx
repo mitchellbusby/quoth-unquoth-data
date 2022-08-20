@@ -316,6 +316,9 @@ const OpenLayersMap = () => {
     };
   }, [mapRef.current, popupRef.current]);
 
+  useEffect(() => {
+    appState.olMapRef = olMapRef;
+  }, [olMapRef.current]);
   return (
     <>
       <div ref={mapRef} id="map"></div>
