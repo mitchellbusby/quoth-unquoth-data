@@ -3,7 +3,7 @@ import React from "react";
 export function TimeOfDay({ seconds }: { seconds: number }) {
   var date = new Date(0);
   date.setSeconds(seconds);
-  var timeString = date.toISOString().substr(11, 8);
+  var timeString = date.toISOString().substr(11, 5);
   return (
     <div
       css={{
