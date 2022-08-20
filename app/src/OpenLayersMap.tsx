@@ -1,4 +1,4 @@
-import React, { createRef, useEffect } from "react";
+import React, { createRef, useEffect, useState } from "react";
 import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
@@ -26,8 +26,34 @@ function getStopLocation(stopId: number) {
   return [stops[stopId].lon, stops[stopId].lat];
 }
 
+function TimeOfDay({ seconds }: { seconds: number }) {
+  var date = new Date(0);
+  date.setSeconds(seconds);
+  var timeString = date.toISOString().substr(11, 8);
+  return (
+    <div
+      css={{
+        background: "white",
+        position: "fixed",
+        left: 32,
+        top: 32,
+        padding: 32,
+        borderRadius: 8,
+      }}
+    >
+      {timeString}
+    </div>
+  );
+}
+
+let framecount;
+
 const OpenLayersMap = () => {
   const mapRef = createRef<HTMLDivElement>();
+  const [timeOfDay, setTimeOfDay] = useState<number>(0);
+  useEffect(() => {
+    framecount = timeOfDay;
+  }, [timeOfDay]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -65,13 +91,12 @@ const OpenLayersMap = () => {
       }),
     });
 
-    let framecount = 0;
-
     buses.on("postrender", (event) => {
+      const timeOfDay = framecount;
       const vectorContext = getVectorContext(event);
       const coordinates = Object.entries(busRoutes)
         .map(([, { stops, times }]) => {
-          const where = times.filter((time) => framecount >= time);
+          const where = times.filter((time) => timeOfDay >= time);
           if (where.length > 0 && where.length < times.length) {
             const [startTime, endTime] = [
               times[where.length - 1],
@@ -85,7 +110,7 @@ const OpenLayersMap = () => {
               interpolate(
                 startLoc,
                 endLoc,
-                (framecount - startTime) / (endTime - startTime)
+                (timeOfDay - startTime) / (endTime - startTime)
               )
             );
           }
@@ -97,7 +122,7 @@ const OpenLayersMap = () => {
       vectorContext.drawGeometry(new MultiPoint(coordinates));
 
       map.render();
-      framecount = (framecount + 1) % (24 * 60 * 60);
+      setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
     });
     map.render();
 
@@ -106,7 +131,12 @@ const OpenLayersMap = () => {
     };
   }, [mapRef.current]);
 
-  return <div ref={mapRef} id="map"></div>;
+  return (
+    <>
+      <div ref={mapRef} id="map"></div>
+      <TimeOfDay seconds={timeOfDay}></TimeOfDay>
+    </>
+  );
 };
 
 const fromLatLon = (coordinates: Coordinate, opt_projection?: string) => {
