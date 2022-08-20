@@ -59,6 +59,7 @@ import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
 import { isSpecialDay } from "./timeConfiguration";
 import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
+import { CreateRouteContext } from "./CreateEditRoutes";
 
 const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 function hashCode(value: string) {
@@ -107,6 +108,7 @@ enum FeatureType {
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
+  const [_, dispatchCreateRouteUpdate] = useContext(CreateRouteContext);
   const mapRef = useRef<HTMLDivElement>();
   const popupRef = useRef<HTMLDivElement>();
 
@@ -312,6 +314,11 @@ const OpenLayersMap = () => {
           popupRef.current.innerText = `${routeNumber}: ${routeName}`;
 
           popup.set("tripId", tripId);
+        }
+
+        if (feature.get("type") === FeatureType.BusStop) {
+          // add to route
+          dispatchCreateRouteUpdate({ type: "add-stop" });
         }
       });
     });

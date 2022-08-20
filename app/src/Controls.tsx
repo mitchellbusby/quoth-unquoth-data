@@ -13,6 +13,7 @@ import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
 import { Select } from "./components/Select";
 import { ClassNames } from "@emotion/react";
+import { CreateEditRoutes } from "./CreateEditRoutes";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -72,6 +73,10 @@ export const Controls = () => {
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
         </div>
+        <div>
+          <CreateEditRoutes />
+        </div>
+        <div>Goodies</div>
         <div
           css={css`
             display: flex;
