@@ -11,6 +11,8 @@ import {
   faUpRightAndDownLeftFromCenter,
 } from "@fortawesome/free-solid-svg-icons";
 
+const breakpointForRadialClock = "768px";
+
 const Clock = () => {
   const [clockScale, setClockScale] = useState<"small" | "large">();
   const appState = useContext(AppStateContext);
@@ -50,7 +52,9 @@ const Clock = () => {
     >
       <div
         css={{
-          position: "relative",
+          [`@media (max-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
         }}
       >
         <CircularSlider
@@ -85,11 +89,24 @@ const Clock = () => {
           }
         />
       </div>
+      <div
+        css={{
+          [`@media (min-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
+        }}
+      >
+        <div>Current time</div>
+        <div>{timeString}</div>
+      </div>
       <Button
         css={{
           position: "absolute",
           bottom: "4px",
           right: "4px",
+          [`@media (max-width: ${breakpointForRadialClock})`]: {
+            display: "none",
+          },
         }}
         size="small"
         onClick={() => {
