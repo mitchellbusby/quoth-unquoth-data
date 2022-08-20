@@ -14,7 +14,7 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
-import busRoutes from "./data/stop_times.json";
+import busTrips from "./data/stop_times.json";
 import stops from "./data/stops.json";
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
@@ -81,7 +81,7 @@ function getStopLocation(stopId: number) {
 }
 
 const processedStops = Object.fromEntries(
-  Object.entries(busRoutes).map(([tripId, { stops, times }]) => {
+  Object.entries(busTrips).map(([tripId, { stops, times }]) => {
     const newTimes = [];
     let prevTime = undefined;
     for (let t of times) {
