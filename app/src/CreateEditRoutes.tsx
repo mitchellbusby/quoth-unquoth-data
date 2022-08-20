@@ -1,6 +1,6 @@
 import { cloneDeep, remove } from "lodash";
 import { fromLonLat } from "ol/proj";
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { Button } from "./components/Button";
@@ -14,6 +14,11 @@ const CreateEditRoutes = () => {
   }>("savedroutes", {
     routes: [],
   });
+
+  useEffect(() => {
+    // Ensure saved routes are synced to the app states
+    appState.savedBusRoutes = savedRoutes;
+  }, [savedRoutes]);
 
   const handleFinishCreate = () => {
     const nextSavedRoutes = cloneDeep(savedRoutes);
@@ -136,7 +141,8 @@ function getStopLocation(stopId: number) {
 
 const formatStopString = (stopId: string) =>
   `${stops[stopId].name} (${stopId})`;
-type SavedRoute = {
+
+export type SavedRoute = {
   stops: {
     stopId: string;
   }[];
