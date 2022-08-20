@@ -13,13 +13,18 @@ import { useLocalStorage } from "usehooks-ts";
 
 const breakpointForRadialClock = "768px";
 
+/**
+ * Start of day from UTC
+ */
+const START_OF_DAY_IN_MINUTES = 3 * 60 * 60;
+
 const Clock = () => {
   const [clockScale, setClockScale] = useLocalStorage<"small" | "large">(
     "clockscale",
     "large"
   );
   const appState = useContext(AppStateContext);
-  const [timeOfDay, setTimeOfDay] = useState<number>(0);
+  const [timeOfDay, setTimeOfDay] = useState<number>(START_OF_DAY_IN_MINUTES);
 
   requestAnimationFrame(() => {
     setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
