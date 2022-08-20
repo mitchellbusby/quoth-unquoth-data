@@ -107,12 +107,12 @@ enum FeatureType {
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
   const mapRef = useRef<HTMLDivElement>();
-  const popOverRef = useRef<HTMLDivElement>();
+  const popupRef = useRef<HTMLDivElement>();
 
   const olMapRef = useRef<Map>();
 
   useEffect(() => {
-    if (!mapRef.current) {
+    if (!mapRef.current || !popupRef.current) {
       return;
     }
 
@@ -264,8 +264,9 @@ const OpenLayersMap = () => {
     };
 
     const popup = new Overlay({
-      element: document.getElementById("popover"),
+      element: popupRef.current,
     });
+
     map.addOverlay(popup);
     map.on("postrender", () => {
       drawAnimatedBusesFrame();
@@ -277,12 +278,11 @@ const OpenLayersMap = () => {
     map.render();
 
     map.on("click", function (evt) {
+      popup.setPosition(undefined);
       map.forEachFeatureAtPixel(evt.pixel, (feature) => {
-        //check the feature type before doing the thing
-
         if (feature.get("type") === FeatureType.Bus) {
           popup.setPosition((feature.getGeometry() as Point).getCoordinates());
-          popup.getElement().innerText = feature.getProperties().tripId;
+          popupRef.current.innerText = feature.getProperties().tripId;
         }
       });
     });
@@ -290,7 +290,7 @@ const OpenLayersMap = () => {
     return () => {
       map.dispose();
     };
-  }, [mapRef.current, popOverRef.current]);
+  }, [mapRef.current, popupRef.current]);
 
   return (
     <>
@@ -302,6 +302,7 @@ const OpenLayersMap = () => {
           padding: 8,
           borderRadius: 8,
         }}
+        ref={popupRef}
       ></div>
     </>
   );
