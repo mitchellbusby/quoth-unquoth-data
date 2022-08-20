@@ -32,11 +32,8 @@ const Clock = () => {
   const [dayOfWeek, setDayOfWeek] = useState<string>(DEFAULT_DAY);
 
   requestAnimationFrame(() => {
-    // todo: if there's a remainder, we need to roll over to the next day; and then wrap around AGAIN
-    // at the end of the week.
     setTimeOfDay((timeOfDay) => {
       const nextTimeOfDay = timeOfDay + 1;
-      // if there's no remainder, we need to wrap and add to the next day
 
       const overflow = nextTimeOfDay % (24 * 60 * 60);
 
