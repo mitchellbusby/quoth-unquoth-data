@@ -10,7 +10,7 @@ import {
   faUpRightAndDownLeftFromCenter,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocalStorage } from "usehooks-ts";
-import { days, DEFAULT_DAY } from "./timeConfiguration";
+import { days, DEFAULT_DAY, getNextDay } from "./timeConfiguration";
 
 const breakpointForRadialClock = "768px";
 
@@ -34,7 +34,18 @@ const Clock = () => {
   requestAnimationFrame(() => {
     // todo: if there's a remainder, we need to roll over to the next day; and then wrap around AGAIN
     // at the end of the week.
-    setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
+    setTimeOfDay((timeOfDay) => {
+      const nextTimeOfDay = timeOfDay + 1;
+      // if there's no remainder, we need to wrap and add to the next day
+
+      const overflow = nextTimeOfDay % (24 * 60 * 60);
+
+      if (overflow === 0) {
+        setDayOfWeek(getNextDay(dayOfWeek));
+      }
+
+      return overflow;
+    });
   });
 
   useEffect(() => {
