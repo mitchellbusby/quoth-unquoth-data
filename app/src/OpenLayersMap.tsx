@@ -60,8 +60,16 @@ import BusStop from "./static/stop.png";
 import { isSpecialDay } from "./timeConfiguration";
 import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
 import { CreateRouteContext } from "./CreateEditRoutes";
+import { StyleLike } from "ol/style/Style";
 
-const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
+const busStopStyle: StyleLike = (feature, resolution) => {
+  console.log(resolution);
+  // const scaleValue = 1 / Math.pow(resolution, 1 / 3)
+  const scaleValue = 2;
+  return new Style({
+    image: new Icon({ src: BusStop, scale: scaleValue }),
+  });
+};
 function hashCode(value: string) {
   var hash = 0,
     i = 0,
@@ -272,18 +280,16 @@ const OpenLayersMap = () => {
     };
 
     const drawBusStopLayer = () => {
-      const coordinates = Object.keys(stops).map((stop) => {
-        return getStopLocation(parseInt(stop));
+      const features = Object.keys(stops).map((stop) => {
+        const stopLocation = getStopLocation(parseInt(stop));
+
+        return new Feature({
+          geometry: new Point(fromLonLat(stopLocation)),
+          type: FeatureType.BusStop,
+          stopId: stop,
+        });
       });
-      busStopSource.addFeatures(
-        coordinates.map(
-          (m) =>
-            new Feature({
-              geometry: new Point(fromLonLat(m)),
-              type: FeatureType.BusStop,
-            })
-        )
-      );
+      busStopSource.addFeatures(features);
     };
 
     const popup = new Overlay({
@@ -317,8 +323,8 @@ const OpenLayersMap = () => {
         }
 
         if (feature.get("type") === FeatureType.BusStop) {
-          // add to route
-          dispatchCreateRouteUpdate({ type: "add-stop" });
+          const stopId = feature.get("stopId");
+          dispatchCreateRouteUpdate({ type: "add-stop", stop: { stopId } });
         }
       });
     });

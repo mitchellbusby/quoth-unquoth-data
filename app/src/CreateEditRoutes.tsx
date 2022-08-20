@@ -1,3 +1,4 @@
+import { remove } from "lodash";
 import React, { createContext, useContext, useReducer } from "react";
 import { Button } from "./components/Button";
 
@@ -11,9 +12,20 @@ const CreateEditRoutes = () => {
           <div>Creating route {state.routeName}</div>
           <div>Current stops:</div>
           <div>
-            {state.stops.map((stop) => (
-              <div key={stop.stopId}>{stop.stopId}</div>
-            ))}
+            <ol>
+              {state.stops.map((stop) => (
+                <li key={stop.stopId}>
+                  Stop {stop.stopId}{" "}
+                  <Button
+                    onClick={() => {
+                      dispatch({ type: "remove-stop", stopId: stop.stopId });
+                    }}
+                  >
+                    trash
+                  </Button>
+                </li>
+              ))}
+            </ol>
           </div>
           <div
             css={{
@@ -60,9 +72,16 @@ type CreatedRoute = {
   routeName: string;
 };
 
+type CreateRouteAction =
+  | {
+      type: "start" | "finish" | "cancel";
+    }
+  | { type: "add-stop"; stop: { stopId: string } }
+  | { type: "remove-stop"; stopId: string };
+
 export function createRouteReducer(
   state: CreateRouteState,
-  action: { type: "start" | "finish" | "cancel" | "add-stop" }
+  action: CreateRouteAction
 ): CreatedRoute | undefined {
   switch (action.type) {
     case "start": {
@@ -76,11 +95,16 @@ export function createRouteReducer(
         return undefined;
       }
       const stops = [...state.stops];
-      stops.push({ stopId: "jieufahsdfo" });
+      stops.push({ stopId: action.stop.stopId });
       return {
         ...state,
         stops,
       };
+    }
+    case "remove-stop": {
+      const stops = [...state.stops];
+      remove(stops, (v) => v.stopId === action.stopId);
+      return { ...state, stops };
     }
     case "finish": {
       // use finished value
@@ -95,7 +119,7 @@ export function createRouteReducer(
 type CreateRouteState = CreatedRoute | undefined;
 
 const CreateRouteContext =
-  createContext<[CreateRouteState, React.Dispatch<{ type: string }>]>(
+  createContext<[CreateRouteState, React.Dispatch<CreateRouteAction>]>(
     undefined
   );
 
