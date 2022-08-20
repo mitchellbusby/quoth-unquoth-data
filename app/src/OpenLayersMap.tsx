@@ -1,4 +1,5 @@
 import { createRef, useEffect, useState } from "react";
+import React, { createRef, useContext, useEffect, useState } from "react";
 import { Feature, Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
@@ -10,7 +11,6 @@ import { Style, Icon } from "ol/style";
 
 import busRoutes from "./data/stop_times.json";
 import stops from "./data/stops.json";
-import { TimeOfDay } from "./TimeOfDay";
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
 import RightBus from "./static/right-bus.png";
@@ -50,6 +50,7 @@ const busTypes = {
     right: new Style({ image: new Icon({ src: RightPrideBus }) }),
   },
 };
+import { AppStateContext } from "./AppState";
 
 const days = [
   "Monday",
@@ -95,13 +96,12 @@ function getStopLocation(stopId: number) {
   return [stops[stopId].lon, stops[stopId].lat];
 }
 
-let framecount;
-
 const OpenLayersMap = () => {
+  const appState = useContext(AppStateContext);
   const mapRef = createRef<HTMLDivElement>();
   const [timeOfDay, setTimeOfDay] = useState<number>(0);
   useEffect(() => {
-    framecount = timeOfDay;
+    appState.frameCount = timeOfDay;
   }, [timeOfDay]);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const OpenLayersMap = () => {
     });
 
     const drawAnimatedBusesFrame = () => {
-      const timeOfDay = framecount;
+      const timeOfDay = appState.frameCount;
 
       const coordinates = Object.entries(busRoutes)
         .map(([tripId, { stops, times }]) => {
@@ -214,8 +214,6 @@ const OpenLayersMap = () => {
 
     busesLayer.on("postrender", (event) => {
       drawAnimatedBusesFrame();
-
-      setTimeOfDay((timeOfDay) => (timeOfDay + 1) % (24 * 60 * 60));
       map.render();
     });
 
@@ -230,7 +228,6 @@ const OpenLayersMap = () => {
   return (
     <>
       <div ref={mapRef} id="map"></div>
-      <TimeOfDay seconds={timeOfDay}></TimeOfDay>
     </>
   );
 };

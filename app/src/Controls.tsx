@@ -19,7 +19,7 @@ const ControlsElement = styled.div(() => ({
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
   padding: "var(--space-s)",
-  transition: "transform 400ms ease",
+  transition: "transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);",
   display: "flex",
   flexDirection: "column",
   gap: "var(--space-m)",
@@ -39,7 +39,7 @@ export const Controls = ({
         css={
           hidden
             ? css`
-                transform: translateX(400px);
+                transform: translateX(324px);
               `
             : css`
                 transform: none;

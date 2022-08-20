@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BusType } from "./buses";
+import { Clock } from "./Clock";
 import { Controls } from "./Controls";
 import { OpenLayersMap } from "./OpenLayersMap";
 
@@ -11,6 +12,7 @@ const App = () => {
     <div>
       <OpenLayersMap />
       <Controls selectedBus={selectedBus} onSelectBus={setSelectedBus} />
+      <Clock />
     </div>
   );
 };
