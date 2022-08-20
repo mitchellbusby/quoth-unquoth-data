@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
@@ -30,7 +31,10 @@ export const Controls = () => {
   const [hidden, setHidden] = useState(true);
 
   const [selectedBusDistribution, setSelectedBus] =
-    useState<BusDistributionType>("standard");
+    useLocalStorage<BusDistributionType>(
+      "busdistributionconfiguration",
+      "standard"
+    );
 
   const appState = useContext(AppStateContext);
 
