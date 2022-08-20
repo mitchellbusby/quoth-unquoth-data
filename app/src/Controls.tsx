@@ -1,16 +1,21 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
+import {
+  faWandMagicSparkles,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { BusList, BusType } from "./buses";
 import { Button } from "./components/Button";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
-  width: "200px",
-  height: "200px",
+  width: "300px",
+  height: "calc(100vh - 4 * var(--space-s))",
   position: "fixed",
   right: "var(--space-s)",
-  bottom: "var(--space-s)",
+  top: "var(--space-s)",
   borderRadius: "var(--surface-border-radius)",
   boxShadow: "var(--shadow-elevation-medium)",
   padding: "var(--space-s)",
@@ -27,24 +32,28 @@ export const Controls = ({
   selectedBus: BusType;
   onSelectBus: (busType: BusType) => void;
 }) => {
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(true);
   return (
     <>
       <ControlsElement
         css={
           hidden
             ? css`
-                transform: translateX(300px);
+                transform: translateX(400px);
               `
             : css`
                 transform: none;
               `
         }
       >
-        <div>
+        <div css={{ display: "flex" }}>
           Controls{" "}
-          <Button onClick={() => setHidden(true)} size={"small"}>
-            Hide
+          <Button
+            onClick={() => setHidden(true)}
+            size={"small"}
+            css={{ marginLeft: "auto" }}
+          >
+            <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
         </div>
         <div
@@ -71,17 +80,23 @@ export const Controls = ({
         <div
           css={css`
             position: fixed;
-            bottom: 8px;
+            top: 8px;
             right: 8px;
           `}
         >
-          <button
+          <Button
+            css={{
+              padding: 16,
+            }}
             onClick={() => {
               setHidden(false);
             }}
           >
-            {"Show"}
-          </button>
+            <FontAwesomeIcon
+              icon={faWandMagicSparkles}
+              size="lg"
+            ></FontAwesomeIcon>
+          </Button>
         </div>
       )}
     </>

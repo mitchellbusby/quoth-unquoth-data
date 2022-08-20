@@ -15,6 +15,20 @@ import CircleStyle from "ol/style/Circle";
 
 import busRoutes from "./data/stop_times.json";
 import stops from "./data/stops.json";
+import { TimeOfDay } from "./TimeOfDay";
+
+const days = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+const specialDays = ["Saturday", "Sunday"];
+const secondsInADay = 24 * 60 * 60;
+const secondsInAWeek = 7 * secondsInADay;
 
 function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   var nx = a[0] + (b[0] - a[0]) * frac;
@@ -24,26 +38,6 @@ function interpolate(a: Coordinate, b: Coordinate, frac: number) {
 
 function getStopLocation(stopId: number) {
   return [stops[stopId].lon, stops[stopId].lat];
-}
-
-function TimeOfDay({ seconds }: { seconds: number }) {
-  var date = new Date(0);
-  date.setSeconds(seconds);
-  var timeString = date.toISOString().substr(11, 8);
-  return (
-    <div
-      css={{
-        background: "white",
-        position: "fixed",
-        left: 32,
-        top: 32,
-        padding: 32,
-        borderRadius: 8,
-      }}
-    >
-      {timeString}
-    </div>
-  );
 }
 
 let framecount;
@@ -60,7 +54,7 @@ const OpenLayersMap = () => {
       return;
     }
 
-    const center = fromLatLon([149.049675, -35.344625]);
+    const center = fromLonLat([149.131, -35.2802]);
 
     const buses = new TileLayer({
       source: new OSM({
@@ -106,7 +100,7 @@ const OpenLayersMap = () => {
               getStopLocation(stops[where.length - 1]),
               getStopLocation(stops[where.length]),
             ];
-            return fromLatLon(
+            return fromLonLat(
               interpolate(
                 startLoc,
                 endLoc,
@@ -139,7 +133,7 @@ const OpenLayersMap = () => {
   );
 };
 
-const fromLatLon = (coordinates: Coordinate, opt_projection?: string) => {
+const fromLonLat = (coordinates: Coordinate, opt_projection?: string) => {
   return transform(
     coordinates,
     "EPSG:4326",
