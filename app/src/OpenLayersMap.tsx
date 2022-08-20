@@ -131,14 +131,21 @@ const OpenLayersMap = () => {
       style: (feature) => {
         const properties = feature.getProperties();
         if (properties.type === "bus") {
-          const roll = Math.abs(hashCode(properties.tripId) % 100);
-          let cumsum = 0;
-          const options = Object.keys(busTypes);
-          let option = options.pop();
-          while (roll > cumsum) {
+          let option = undefined;
+
+          if (appState.busDistribution === "pride") {
+            option = "pride";
+          } else {
+            const roll = Math.abs(hashCode(properties.tripId) % 100);
+            let cumsum = 0;
+            const options = Object.keys(busTypes);
             option = options.pop();
-            cumsum += busTypes[option].prob;
+            while (roll > cumsum) {
+              option = options.pop();
+              cumsum += busTypes[option].prob;
+            }
           }
+
           let rotation = (2 * Math.PI - properties.orientation) % (2 * Math.PI);
           let style;
           if (rotation >= Math.PI / 2 && rotation <= (3 * Math.PI) / 2) {

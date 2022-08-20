@@ -5,8 +5,10 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
-import { BusList, BusType } from "./buses";
+import { useContext, useEffect, useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
+import { AppStateContext } from "./AppState";
+import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
 
 const ControlsElement = styled.div(() => ({
@@ -25,14 +27,25 @@ const ControlsElement = styled.div(() => ({
   gap: "var(--space-m)",
 }));
 
-export const Controls = ({
-  selectedBus,
-  onSelectBus,
-}: {
-  selectedBus: BusType;
-  onSelectBus: (busType: BusType) => void;
-}) => {
+export const Controls = () => {
   const [hidden, setHidden] = useState(true);
+
+  const [selectedBusDistribution, setSelectedBus] =
+    useLocalStorage<BusDistributionType>(
+      "busdistributionconfiguration",
+      "standard"
+    );
+
+  const appState = useContext(AppStateContext);
+
+  useEffect(() => {
+    appState.busDistribution = selectedBusDistribution;
+  }, [selectedBusDistribution]);
+
+  const handleChangeBusDistribution = (newValue: BusDistributionType) => {
+    setSelectedBus(newValue);
+  };
+
   return (
     <>
       <ControlsElement
@@ -66,9 +79,11 @@ export const Controls = ({
           <select
             id="bus-select"
             onChange={(event) => {
-              onSelectBus(event.target.value as BusType);
+              handleChangeBusDistribution(
+                event.target.value as BusDistributionType
+              );
             }}
-            value={selectedBus}
+            value={selectedBusDistribution}
           >
             {BusList.map((bus) => (
               <option value={bus.id}>{bus.label}</option>
