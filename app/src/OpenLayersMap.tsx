@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Feature, Map, View } from "ol";
+import { Feature, Map, Overlay, View } from "ol";
 import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import { transform } from "ol/proj";
@@ -70,17 +70,6 @@ function hashCode(value: string) {
   return hash;
 }
 
-const busImageStyle = new Style({
-  // image: new CircleStyle({
-  //   radius: 5,
-  //   fill: new Fill({ color: "yellow" }),
-  //   stroke: new Stroke({ color: "red", width: 1 }),
-  // }),
-  image: new Icon({
-    src: Bus,
-  }),
-});
-
 function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   var nx = a[0] + (b[0] - a[0]) * frac;
   var ny = a[1] + (b[1] - a[1]) * frac;
@@ -113,10 +102,7 @@ const processedStops = Object.fromEntries(
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
   const mapRef = useRef<HTMLDivElement>();
-  const [timeOfDay, setTimeOfDay] = useState<number>(0);
-  useEffect(() => {
-    appState.frameCount = timeOfDay;
-  }, [timeOfDay]);
+  const popOverRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -267,6 +253,10 @@ const OpenLayersMap = () => {
       );
     };
 
+    const popup = new Overlay({
+      element: document.getElementById("popover"),
+    });
+    map.addOverlay(popup);
     map.on("postrender", () => {
       drawAnimatedBusesFrame();
       map.render();
@@ -278,19 +268,30 @@ const OpenLayersMap = () => {
 
     map.on("click", function (evt) {
       console.log(evt);
-      var feature = map.forEachFeatureAtPixel(evt.pixel, (evt) =>
-        console.log(evt)
-      );
+      var feature = map.forEachFeatureAtPixel(evt.pixel, (evt) => {
+        console.log({ evt, popup });
+        console.log((evt.getGeometry() as Point).getCoordinates());
+        popup.setPosition((evt.getGeometry() as Point).getCoordinates());
+        popup.getElement().innerText = evt.getProperties().tripId;
+      });
     });
 
     return () => {
       map.dispose();
     };
-  }, [mapRef.current]);
+  }, [mapRef.current, popOverRef.current]);
 
   return (
     <>
       <div ref={mapRef} id="map"></div>
+      <div
+        id="popover"
+        css={{
+          background: "white",
+          padding: 8,
+          borderRadius: 8,
+        }}
+      ></div>
     </>
   );
 };
