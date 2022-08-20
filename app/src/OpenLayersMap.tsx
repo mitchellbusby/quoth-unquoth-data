@@ -114,12 +114,10 @@ const getProcessedStops = (savedRoutes: SavedRoute[]) => {
   );
 };
 
+const processedStops = getProcessedStops();
+
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
-  const processedStops = useMemo(
-    () => getProcessedStops(appState.savedBusRoutes.routes),
-    [appState.savedBusRoutes]
-  );
 
   const [_, dispatchCreateRouteUpdate] = useContext(CreateRouteContext);
   const mapRef = useRef<HTMLDivElement>();
