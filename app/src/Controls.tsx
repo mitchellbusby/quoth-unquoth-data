@@ -10,6 +10,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { BusList, BusDistributionType } from "./buses";
 import { Button } from "./components/Button";
+import { Select } from "./components/Select";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -76,7 +77,7 @@ export const Controls = () => {
           `}
         >
           <label htmlFor="bus-select">Bus icon:</label>
-          <select
+          <Select
             id="bus-select"
             onChange={(event) => {
               handleChangeBusDistribution(
@@ -88,7 +89,7 @@ export const Controls = () => {
             {BusList.map((bus) => (
               <option value={bus.id}>{bus.label}</option>
             ))}
-          </select>
+          </Select>
         </div>
       </ControlsElement>
       {hidden && (

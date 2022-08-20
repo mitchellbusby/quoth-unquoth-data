@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocalStorage } from "usehooks-ts";
 import { days, DEFAULT_DAY, getNextDay } from "./timeConfiguration";
+import { Select } from "./components/Select";
 
 const breakpointForRadialClock = "768px";
 
@@ -155,7 +156,7 @@ const Clock = () => {
           height: "fit-content",
         }}
       >
-        <select
+        <Select
           value={dayOfWeek}
           onChange={(event) => {
             setDayOfWeek(event.target.value);
@@ -166,7 +167,7 @@ const Clock = () => {
               {day}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
     </div>
   );
