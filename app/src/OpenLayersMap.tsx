@@ -58,7 +58,7 @@ const busTypes = {
 import { AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
 import { isSpecialDay } from "./timeConfiguration";
-import { getRouteNumberFromId } from "./utils/routes";
+import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
 
 const busStopStyle = new Style({ image: new Icon({ src: BusStop }) });
 function hashCode(value: string) {
@@ -292,9 +292,12 @@ const OpenLayersMap = () => {
         if (feature.get("type") === FeatureType.Bus) {
           popup.setPosition((feature.getGeometry() as Point).getCoordinates());
           const tripId = feature.get("tripId");
-          popupRef.current.innerText = `Bus route ${getRouteNumberFromId(
-            tripId
-          )}`;
+
+          const routeNumber = getRouteNumberFromId(tripId);
+
+          const routeName = getRouteNameFromNumber(routeNumber);
+          popupRef.current.innerText = `${routeNumber}: ${routeName}`;
+
           popup.set("tripId", tripId);
         }
       });
