@@ -1,5 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AppStateContext } from "./AppState";
+import { DateTime } from "luxon";
 
 const Clock = () => {
   const appState = useContext(AppStateContext);
@@ -13,11 +14,11 @@ const Clock = () => {
     appState.frameCount = timeOfDay;
   }, [timeOfDay]);
 
-  var date = new Date(0);
-  date.setSeconds(timeOfDay);
-  var timeString = date.toISOString().substr(11, 5);
+  const timeString = useMemo(() => {
+    const date = DateTime.fromSeconds(timeOfDay, { zone: "UTC" });
 
-  // start making it better
+    return date.toFormat("HH:mm a");
+  }, [timeOfDay]);
 
   return (
     <div
