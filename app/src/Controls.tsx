@@ -65,7 +65,7 @@ export const Controls = () => {
           <Button
             onClick={() => setHidden(true)}
             size={"small"}
-            css={{ marginLeft: "auto" }}
+            css={{ marginLeft: "auto", padding: "6px 12px" }}
           >
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
