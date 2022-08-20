@@ -216,14 +216,21 @@ const OpenLayersMap = () => {
               getStopLocation(stops[where.length - 1]),
               getStopLocation(stops[where.length]),
             ];
+
+            const lerpedCoordinate = fromLonLat(
+              interpolate(
+                startLoc,
+                endLoc,
+                (timeOfDay - startTime) / (endTime - startTime)
+              )
+            );
+
+            if (tripId === popup.get("tripId")) {
+              popup.setPosition(lerpedCoordinate);
+            }
+
             return {
-              coordinate: fromLonLat(
-                interpolate(
-                  startLoc,
-                  endLoc,
-                  (timeOfDay - startTime) / (endTime - startTime)
-                )
-              ),
+              coordinate: lerpedCoordinate,
               direction: Math.atan2(
                 endLoc[1] - startLoc[1],
                 endLoc[0] - startLoc[0]
@@ -280,6 +287,7 @@ const OpenLayersMap = () => {
 
     map.on("click", function (evt) {
       popup.setPosition(undefined);
+      popup.set("tripId", undefined);
       map.forEachFeatureAtPixel(evt.pixel, (feature) => {
         if (feature.get("type") === FeatureType.Bus) {
           popup.setPosition((feature.getGeometry() as Point).getCoordinates());
@@ -287,6 +295,7 @@ const OpenLayersMap = () => {
           popupRef.current.innerText = `Bus route ${getRouteNumberFromId(
             tripId
           )}`;
+          popup.set("tripId", tripId);
         }
       });
     });
