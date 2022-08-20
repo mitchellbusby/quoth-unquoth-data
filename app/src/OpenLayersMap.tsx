@@ -99,6 +99,11 @@ const processedStops = Object.fromEntries(
   })
 );
 
+enum FeatureType {
+  Bus = "bus",
+  BusStop = "busstop",
+}
+
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
   const mapRef = useRef<HTMLDivElement>();
@@ -118,7 +123,7 @@ const OpenLayersMap = () => {
       source: busesSource,
       style: (feature) => {
         const properties = feature.getProperties();
-        if (properties.type === "bus") {
+        if (properties.type === FeatureType.Bus) {
           let option = undefined;
 
           if (appState.busDistribution === "pride") {
@@ -236,7 +241,7 @@ const OpenLayersMap = () => {
             new Feature({
               geometry: new Point(m.coordinate),
               orientation: m.direction,
-              type: "bus",
+              type: FeatureType.Bus,
               tripId: m.tripId,
             })
         )
@@ -252,6 +257,7 @@ const OpenLayersMap = () => {
           (m) =>
             new Feature({
               geometry: new Point(fromLonLat(m)),
+              type: FeatureType.BusStop,
             })
         )
       );
@@ -274,7 +280,7 @@ const OpenLayersMap = () => {
       map.forEachFeatureAtPixel(evt.pixel, (feature) => {
         //check the feature type before doing the thing
 
-        if (feature.get("type") === "bus") {
+        if (feature.get("type") === FeatureType.Bus) {
           popup.setPosition((feature.getGeometry() as Point).getCoordinates());
           popup.getElement().innerText = feature.getProperties().tripId;
         }
