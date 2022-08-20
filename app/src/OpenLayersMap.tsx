@@ -274,8 +274,6 @@ const OpenLayersMap = () => {
 
     map.addOverlay(popup);
     map.on("postrender", () => {
-      busStopLayer.draw();
-
       drawAnimatedBusesFrame();
       map.render();
     });
