@@ -65,7 +65,7 @@ export const Controls = () => {
         }
       >
         <div css={{ display: "flex", alignItems: "center" }}>
-          Controls{" "}
+          <div css={{ fontSize: 24, fontWeight: 500 }}>Controls</div>
           <Button
             onClick={() => setHidden(true)}
             size={"small"}
