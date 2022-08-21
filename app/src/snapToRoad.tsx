@@ -1,6 +1,6 @@
 import { Coordinate } from "ol/coordinate";
 import { Extent, intersectsSegment } from "ol/extent";
-import { fromLonLat } from "./OpenLayersMap";
+import { fromLonLat } from "ol/proj";
 import lines from "./data/bus_route_shapes.json";
 
 function project(p: Coordinate, a: Coordinate, b: Coordinate) {

@@ -5,7 +5,7 @@ import { SavedRoute } from "./CreateEditRoutes";
 import { preProcessedStops } from "./processedTrips";
 import { DEFAULT_DAY } from "./timeConfiguration";
 
-type Trip = {
+export type Trip = {
   stops: number[];
   times: number[];
 };
@@ -17,6 +17,7 @@ type AppState = {
   olMapRef?: React.MutableRefObject<Map>;
   savedBusRoutes: {
     routes: SavedRoute[];
+    trips: { [tripId: string]: Trip }[];
   };
   processedStops: {
     [tripId: string]: Trip;
@@ -29,6 +30,7 @@ const appState: AppState = {
   busDistribution: "standard",
   savedBusRoutes: {
     routes: [],
+    trips: [],
   },
   processedStops: preProcessedStops,
 };

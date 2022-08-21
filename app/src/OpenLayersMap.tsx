@@ -173,8 +173,9 @@ const OpenLayersMap = () => {
     olMapRef.current = map;
 
     const drawAnimatedBusesFrame = () => {
-      const timeOfDay = appState.frameCount;
-      const trips = appState.processedStops;
+      const state = appState;
+      const timeOfDay = state.frameCount;
+      const trips = state.processedStops;
 
       const coordinates = Object.entries(trips)
         .filter(([tripId]) => {

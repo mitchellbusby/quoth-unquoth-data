@@ -1,14 +1,14 @@
-import { cloneDeep, remove } from "lodash";
+import { cloneDeep, remove, sum } from "lodash";
 import { Coordinate, distance } from "ol/coordinate";
 import { fromLonLat } from "ol/proj";
 import React, { createContext, useContext, useEffect, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { AppStateContext } from "./AppState";
+import { AppStateContext, Trip } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
 
-function generateTrips(route: SavedRoute) {
+function generateTrips(route: SavedRoute): { [tripId: string]: Trip } {
   const tripSegments = route.stops
     .slice(1)
     .map(({ stopId }, idx) => [
@@ -17,8 +17,60 @@ function generateTrips(route: SavedRoute) {
     ]);
   const tripDurations = tripSegments.map(([startId, stopId]) => {
     const d = distance(getStopLocation(startId), getStopLocation(stopId));
-    return 15 + Math.ceil(Math.random() * 5);
+    return 15 + Math.ceil(Math.random() * 5) + d * 50000;
   });
+  const totalDuration = sum(tripDurations);
+  const startTime = 8 * 60 * 60;
+  let trips = [];
+  if (route.stops[0].stopId === route.stops[route.stops.length - 1].stopId) {
+    // Loop line!
+    const possibleTrips = Math.ceil((24 * 60 * 60 - startTime) / totalDuration);
+    let now = startTime;
+    for (let i = 0; i < possibleTrips; i++) {
+      trips.push({
+        stops: route.stops.map(({ stopId }) => stopId),
+        times: tripDurations.reduce(
+          (acc, duration) => [...acc, acc[acc.length - 1] + duration],
+          [now]
+        ),
+      });
+      now += totalDuration + 10;
+    }
+  } else {
+    // Return trips
+    const possibleTrips = Math.ceil((12 * 60 * 60 - startTime) / totalDuration);
+    let now = startTime;
+    let stops = [...route.stops];
+    let times = [...tripDurations];
+    for (let i = 0; i < possibleTrips; i++) {
+      trips.push({
+        stops: stops.map(({ stopId }) => stopId),
+        times: times.reduce(
+          (acc, duration) => [...acc, acc[acc.length - 1] + duration],
+          [now]
+        ),
+      });
+      now += totalDuration + 10;
+      stops.reverse();
+      times.reverse();
+      trips.push({
+        stops: stops.map(({ stopId }) => stopId),
+        times: times.reduce(
+          (acc, duration) => [...acc, acc[acc.length - 1] + duration],
+          [now]
+        ),
+      });
+      stops.reverse();
+      times.reverse();
+      now += totalDuration + 10;
+    }
+  }
+  return Object.fromEntries(
+    trips.map((trip, idx) => [
+      `Generated-${route.name}-${idx}-Weekday-06`,
+      trip,
+    ])
+  );
 }
 
 const CreateEditRoutes = () => {
@@ -32,10 +84,18 @@ const CreateEditRoutes = () => {
 
   useEffect(() => {
     // Ensure saved routes are synced to the app states
-    appState.savedBusRoutes = savedRoutes;
+    appState.savedBusRoutes = {
+      routes: savedRoutes.routes,
+      trips: savedRoutes.routes.map((route) => generateTrips(route)),
+    };
+
+    console.log(appState.savedBusRoutes);
     // todo: when I have generated trips, pre processed trips get smashed together
     // with them.
-    appState.processedStops = preProcessedStops;
+    appState.processedStops = {
+      ...preProcessedStops,
+      ...appState.savedBusRoutes.trips.reduce((a, b) => ({ ...a, ...b }), {}),
+    };
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {
