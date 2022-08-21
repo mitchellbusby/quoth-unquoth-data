@@ -7,6 +7,8 @@ import { css } from "@emotion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDownLeftAndUpRightToCenter,
+  faPause,
+  faPlay,
   faUpRightAndDownLeftFromCenter,
 } from "@fortawesome/free-solid-svg-icons";
 import { useLocalStorage } from "usehooks-ts";
@@ -34,6 +36,8 @@ const Clock = () => {
     "slow" | "medium" | "fast"
   >("clockspeed", "medium");
 
+  const [pauseClock, setPauseClock] = useLocalStorage("clockpaused", false);
+
   useEffect(() => {
     // @ts-ignore
     window.setClockSpeed = setClockSpeed;
@@ -44,20 +48,22 @@ const Clock = () => {
   const [dayOfWeek, setDayOfWeek] = useState<string>(DEFAULT_DAY);
 
   requestAnimationFrame(() => {
-    setTimeOfDay((timeOfDay) => {
-      const tick = Date.now();
-      const nextTimeOfDay =
-        timeOfDay + (tick - lastTick) / speedToValue(clockSpeed);
-      lastTick = tick;
+    if (!pauseClock) {
+      setTimeOfDay((timeOfDay) => {
+        const tick = Date.now();
+        const nextTimeOfDay =
+          timeOfDay + (tick - lastTick) / speedToValue(clockSpeed);
+        lastTick = tick;
 
-      const overflow = nextTimeOfDay % (24 * 60 * 60);
+        const overflow = nextTimeOfDay % (24 * 60 * 60);
 
-      if (overflow < timeOfDay) {
-        setDayOfWeek(getNextDay(dayOfWeek));
-      }
+        if (overflow < timeOfDay) {
+          setDayOfWeek(getNextDay(dayOfWeek));
+        }
 
-      return overflow;
-    });
+        return overflow;
+      });
+    }
   });
 
   useEffect(() => {
@@ -138,6 +144,23 @@ const Clock = () => {
           <div>Current time</div>
           <div>{timeString}</div>
         </div>
+        <Button
+          css={{
+            position: "absolute",
+            bottom: 4,
+            left: 4,
+            padding: "3px 9px",
+          }}
+          size="small"
+          onClick={() => {
+            if (pauseClock) {
+              lastTick = Date.now();
+            }
+            setPauseClock(!pauseClock);
+          }}
+        >
+          <FontAwesomeIcon icon={pauseClock ? faPlay : faPause} />
+        </Button>
         <Button
           css={{
             position: "absolute",

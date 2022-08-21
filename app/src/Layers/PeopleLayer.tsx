@@ -17,7 +17,7 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
   getStyle(feature: FeatureLike, resolution: number): Style {
     return new Style({
       image: new Circle({
-        radius: 4,
+        radius: 10,
         fill: new Fill({ color: "red" }),
       }),
     });
