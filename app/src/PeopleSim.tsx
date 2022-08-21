@@ -112,6 +112,7 @@ export function generateCachedTripMap(
   return stopTripTimeMap;
 }
 
+<<<<<<< HEAD
 export function pathFind(
   intent: Intent,
   busRoutes: TripCollection,
@@ -146,6 +147,21 @@ export function pathFind(
       lon: s.lon,
       lat: s.lat,
       stopIdx: parseInt(id),
+=======
+export function pathFind(intent, busRoutes, stops, cachedTripMap) {
+    // TODO: Check if there's a direct route first.
+    // Pathfind backwards...
+    const allowRadius = 0.01; // 1 km
+    const walkSpeed = 88650; // s/deg
+    // Find the bus stops within allowRadius and calculate their edge weights.
+    const frontier = new PriorityQueue((a, b) => {
+        if (a.f <= b.f) {
+          return -1;
+        }
+        if (a.f > b.f) {
+          return 1;
+        }
+>>>>>>> 775e89811b5fa50f3beb2181cf939b4cf14479e7
     });
   }
   // yaaay we have a frontier
@@ -163,6 +179,7 @@ export function pathFind(
       return reconstruct(openNode);
     }
 
+<<<<<<< HEAD
     // For each connecting bus route that arrives before the current time...
     let now = intent.arrivalTime - openNode.g;
     // Find all trips that visited this bus stop already.
@@ -211,12 +228,56 @@ export function pathFind(
               stopIdx: stops_[j],
             });
           }
+=======
+        // For each connecting bus route that arrives before the current time...
+        let now = intent.arrivalTime - openNode.g;
+        // Find all trips that visited this bus stop already.
+        let goodTrips = [];
+        for (const [trip, time] of stopTripTimeMap[openNode.stopIdx]) {
+            if (time <= now && ((now - time) < 20 * 60)) {
+                // trip is at a good time to board
+                goodTrips.push([trip, time]);
+            }
+        }
+        // Each of these will have a g and an h.
+        // The g is how long we have to wait plus existing g.
+        for (const [tripId, stopTime] of goodTrips) {
+            const tripDetails = busRoutes[tripId];
+            const stops_ = tripDetails.stops;
+            const times_ = tripDetails.times;
+            // h is the minimum distance from a bus stop on this trip to the goal...
+            // times the walk speed, plus the time between stops.
+            let distances = stops_.map(s => dist([stops[s].lon, stops[s].lat], intent.destination));
+            let argmin = indexOfMin(distances);
+            let timeAtGoalStop = times_[argmin];
+            // baseH is how long it takes to walk from the best stop to home
+            let baseH = Math.min(...distances) * walkSpeed;
+            for (let i = 1; i < stops_.length; i++) { // can't catch a bus that doesn't go anywhere
+                if (stops_[i] == openNode.stopIdx) {
+                    // add all previous stops
+                    // timeDelta is how long we have between now and the time
+                    // that the bus arrived
+                    let timeDelta = now - times_[i];
+                    for (let j = i - 1; j >= 0; j--) {
+                        // time to get to stop j including waiting for bus
+                        let g = openNode.g + timeDelta + (times_[i] - times_[j]);
+                        // time to get from next stop to home
+                        let h = baseH + (times_[j] - timeAtGoalStop);
+                        // Then, just advance us to the next bus stop.
+                        let stop = stops[stops_[j]]
+                        frontier.enqueue(
+                            new PFNodeStop(h, g, openNode, stop.lon, stop.lat, stops_[j]));
+                    }
+                }
+            }
+>>>>>>> 775e89811b5fa50f3beb2181cf939b4cf14479e7
         }
       }
     }
   }
   return null;
 }
+<<<<<<< HEAD
 
 // for each neighbor of current
 //     // d(current,neighbor) is the weight of the edge from current to neighbor
@@ -229,3 +290,5 @@ export function pathFind(
 //         fScore[neighbor] := tentative_gScore + h(neighbor)
 //         if neighbor not in openSet
 //             openSet.add(neighbor)
+=======
+>>>>>>> 775e89811b5fa50f3beb2181cf939b4cf14479e7

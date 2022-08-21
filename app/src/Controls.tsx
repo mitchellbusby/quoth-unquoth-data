@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import {
+  faSliders,
   faWandMagicSparkles,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
@@ -34,6 +35,10 @@ const ControlsElement = styled.div(() => ({
 export const Controls = () => {
   const [hidden, setHidden] = useLocalStorage("controlshidden", false);
 
+  const [currentTab, setCurrentTab] = useState<"custom-routes" | "goodies">(
+    "custom-routes"
+  );
+
   const [selectedBusDistribution, setSelectedBus] =
     useLocalStorage<BusDistributionType>(
       "busdistributionconfiguration",
@@ -64,7 +69,7 @@ export const Controls = () => {
         }
       >
         <div css={{ display: "flex", alignItems: "center" }}>
-          Controls{" "}
+          <div css={{ fontSize: 24, fontWeight: 500 }}>Controls</div>
           <Button
             onClick={() => setHidden(true)}
             size={"small"}
@@ -73,33 +78,58 @@ export const Controls = () => {
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
         </div>
-        <div>
-          <CreateEditRoutes />
-        </div>
-        <div>Goodies</div>
         <div
-          css={css`
-            display: flex;
-            gap: var(--space-xs);
-          `}
+          css={{
+            display: "flex",
+            gap: 4,
+          }}
         >
-          <label htmlFor="bus-select">Bus icon:</label>
-          <Select
-            id="bus-select"
-            onChange={(event) => {
-              handleChangeBusDistribution(
-                event.target.value as BusDistributionType
-              );
-            }}
-            value={selectedBusDistribution}
-          >
-            {BusList.map((bus) => (
-              <option key={bus.id} value={bus.id}>
-                {bus.label}
-              </option>
-            ))}
-          </Select>
+          <Button onClick={() => setCurrentTab("custom-routes")}>
+            Custom routes
+          </Button>
+          <Button onClick={() => setCurrentTab("goodies")}>Goodies</Button>
         </div>
+        <hr
+          css={{
+            borderBottom: "1px solid #c6c6c6",
+            borderTop: 0,
+            width: "100%",
+            margin: 0,
+          }}
+        />
+        {currentTab === "custom-routes" && (
+          <div>
+            <CreateEditRoutes />
+          </div>
+        )}
+        {currentTab === "goodies" && (
+          <>
+            <div>Goodies</div>
+            <div
+              css={css`
+                display: flex;
+                gap: var(--space-xs);
+              `}
+            >
+              <label htmlFor="bus-select">Bus icon:</label>
+              <Select
+                id="bus-select"
+                onChange={(event) => {
+                  handleChangeBusDistribution(
+                    event.target.value as BusDistributionType
+                  );
+                }}
+                value={selectedBusDistribution}
+              >
+                {BusList.map((bus) => (
+                  <option key={bus.id} value={bus.id}>
+                    {bus.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </>
+        )}
       </ControlsElement>
       <ClassNames>
         {({ css }) => (
@@ -145,10 +175,7 @@ export const Controls = () => {
                   setHidden(false);
                 }}
               >
-                <FontAwesomeIcon
-                  icon={faWandMagicSparkles}
-                  size="lg"
-                ></FontAwesomeIcon>
+                <FontAwesomeIcon icon={faSliders} size="lg"></FontAwesomeIcon>
               </Button>
             </div>
           </CSSTransition>

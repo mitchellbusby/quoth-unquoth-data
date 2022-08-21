@@ -21,9 +21,8 @@ export class BusStopLayer extends AbstractLayer<Geometry> {
   }
 
   getStyle() {
-    const scaleValue = 2;
     return new Style({
-      image: new Icon({ src: BusStop, scale: scaleValue }),
+      image: new Icon({ src: BusStop, opacity: 0.8, scale: 0.8 }),
     });
   }
 
