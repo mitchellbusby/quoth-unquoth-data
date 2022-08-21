@@ -5,12 +5,13 @@ import { Coordinate, distance } from "ol/coordinate";
 import { fromLonLat } from "ol/proj";
 import React, { createContext, useContext, useEffect, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { AppStateContext, Trip } from "./AppState";
+import { AppStateContext, Trip, TripCollection } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
 import defaultRoutes from "./data/routes.json";
 import { SavedRouteComponent } from "./SavedRoute";
+import { StopCollection } from "./PeopleSim";
 
 function generateTrips(route: SavedRoute): TripCollection {
   const tripSegments = route.stops
@@ -77,7 +78,11 @@ function generateTrips(route: SavedRoute): TripCollection {
   );
 }
 
-const CreateEditRoutes = () => {
+const CreateEditRoutes = ({
+  updateRoutes,
+}: {
+  updateRoutes: (routes: TripCollection, stops: StopCollection) => void;
+}) => {
   const appState = useContext(AppStateContext);
   const [state, dispatch] = useContext(CreateRouteContext);
   const [savedRoutes, setSavedRoutes] = useLocalStorage<{
@@ -135,6 +140,7 @@ const CreateEditRoutes = () => {
         ...customRoutesAndTrips.routes,
       },
     };
+    updateRoutes(appState.processedStops, stops);
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {

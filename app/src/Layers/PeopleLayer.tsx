@@ -23,10 +23,14 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
   cachedTripMap: TripTimeMap;
   trips: Trip[];
 
-  sample = 1000;
+  sample = 100;
 
   constructor(routes: TripCollection, stops: StopCollection) {
     super();
+    this.refresh(routes, stops);
+  }
+
+  refresh(routes: TripCollection, stops: StopCollection) {
     const peopleCount = range(0, this.sample);
     this.cachedTripMap = generateCachedTripMap(routes, stops);
     this.intents = peopleCount.map((id) => getIntent(id));

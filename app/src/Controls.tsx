@@ -105,7 +105,11 @@ export const Controls = ({ peopleLayer }: { peopleLayer: PeopleLayer }) => {
         />
         {currentTab === "custom-routes" && (
           <div>
-            <CreateEditRoutes />
+            <CreateEditRoutes
+              updateRoutes={(routes, stops) =>
+                peopleLayer.refresh(routes, stops)
+              }
+            />
           </div>
         )}
         {currentTab === "goodies" && (

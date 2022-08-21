@@ -115,6 +115,7 @@ const OpenLayersMap = ({
     if (!mapRef.current || !popupRef.current) {
       return;
     }
+    console.log("woah nelly");
 
     const center = fromLonLat([149.131, -35.2802]);
 

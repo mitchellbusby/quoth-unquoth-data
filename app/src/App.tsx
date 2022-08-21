@@ -1,4 +1,4 @@
-import { useContext, useReducer, useState } from "react";
+import { useContext, useMemo, useReducer, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
@@ -15,7 +15,10 @@ const App = () => {
   const reducer = useReducer(createRouteReducer, undefined);
 
   const appState = useContext(AppStateContext);
-  const peopleLayer = new PeopleLayer(appState.processedStops, stops);
+  const peopleLayer = useMemo(
+    () => new PeopleLayer(appState.processedStops, stops),
+    []
+  );
 
   return (
     <CreateRouteContext.Provider value={reducer}>
