@@ -94,7 +94,9 @@ export const Controls = () => {
             value={selectedBusDistribution}
           >
             {BusList.map((bus) => (
-              <option value={bus.id}>{bus.label}</option>
+              <option key={bus.id} value={bus.id}>
+                {bus.label}
+              </option>
             ))}
           </Select>
         </div>
