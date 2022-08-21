@@ -35,6 +35,10 @@ const ControlsElement = styled.div(() => ({
 export const Controls = () => {
   const [hidden, setHidden] = useLocalStorage("controlshidden", false);
 
+  const [currentTab, setCurrentTab] = useState<"custom-routes" | "goodies">(
+    "custom-routes"
+  );
+
   const [selectedBusDistribution, setSelectedBus] =
     useLocalStorage<BusDistributionType>(
       "busdistributionconfiguration",
@@ -74,33 +78,50 @@ export const Controls = () => {
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </Button>
         </div>
-        <div>
-          <CreateEditRoutes />
-        </div>
-        <div>Goodies</div>
         <div
-          css={css`
-            display: flex;
-            gap: var(--space-xs);
-          `}
+          css={{
+            display: "flex",
+            gap: 4,
+          }}
         >
-          <label htmlFor="bus-select">Bus icon:</label>
-          <Select
-            id="bus-select"
-            onChange={(event) => {
-              handleChangeBusDistribution(
-                event.target.value as BusDistributionType
-              );
-            }}
-            value={selectedBusDistribution}
-          >
-            {BusList.map((bus) => (
-              <option key={bus.id} value={bus.id}>
-                {bus.label}
-              </option>
-            ))}
-          </Select>
+          <Button onClick={() => setCurrentTab("custom-routes")}>
+            Custom routes
+          </Button>
+          <Button onClick={() => setCurrentTab("goodies")}>Goodies</Button>
         </div>
+        {currentTab === "custom-routes" && (
+          <div>
+            <CreateEditRoutes />
+          </div>
+        )}
+        {currentTab === "goodies" && (
+          <>
+            <div>Goodies</div>
+            <div
+              css={css`
+                display: flex;
+                gap: var(--space-xs);
+              `}
+            >
+              <label htmlFor="bus-select">Bus icon:</label>
+              <Select
+                id="bus-select"
+                onChange={(event) => {
+                  handleChangeBusDistribution(
+                    event.target.value as BusDistributionType
+                  );
+                }}
+                value={selectedBusDistribution}
+              >
+                {BusList.map((bus) => (
+                  <option key={bus.id} value={bus.id}>
+                    {bus.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </>
+        )}
       </ControlsElement>
       <ClassNames>
         {({ css }) => (
