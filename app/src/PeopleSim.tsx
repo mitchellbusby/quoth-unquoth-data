@@ -1,4 +1,11 @@
 import allpops from "./data/allpops.json";
+import {
+  PriorityQueue,
+  MinPriorityQueue,
+  MaxPriorityQueue,
+  ICompare,
+  IGetCompareValue,
+} from '@datastructures-js/priority-queue';
 
 export function getIntent(idx: number) {
     let person = allpops.people[idx];
@@ -62,10 +69,19 @@ function indexOfMin(arr) {
 function reconstruct(node) {
     let nodes = [];
     while (node !== undefined) {
-        nodes.push(node);
+        nodes.push(node.stopIdx);
         node = node.parent;
     }
     return nodes;
+}
+
+function hasNode(nodes, node) {
+    for (node_ of nodes) {
+        if (node_.stopIdx == node.stopIdx) {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function pathFind(intent, busRoutes, stops) {
@@ -73,7 +89,15 @@ export function pathFind(intent, busRoutes, stops) {
     const allowRadius = 0.005; // 500m
     const walkSpeed = 88650; // s/deg
     // Find the bus stops within allowRadius and calculate their edge weights.
-    let frontier = [];
+    const frontier = new PriorityQueue((a, b) => {
+        if (a.f <= b.f) {
+          return -1;
+        }
+        if (a.f > b.f) {
+          return 1;
+        }
+    });
+    let seen = new Set();
     for (let [id, s] of Object.entries(stops)) {
         let distance = dist([s.lon, s.lat], intent.destination);
         if (distance > allowRadius) {
@@ -82,18 +106,19 @@ export function pathFind(intent, busRoutes, stops) {
         }
         let walkTime = distance * walkSpeed;
         let h = 0;
-        frontier.push(new PFNodeStop(h, walkTime, undefined, s.lon, s.lat, id));
+        frontier.enqueue(
+            new PFNodeStop(h, walkTime, undefined, s.lon, s.lat, parseInt(id)));
     }
     // yaaay we have a frontier
-    while (frontier.length) {
-        // TODO: Make this log(n) instead of linear.
-        let minIndex = indexOfMin(frontier); // todo fix this lol
-        let openNode = frontier[minIndex];
-        // console.log('exploring node', openNode);
-        frontier.slice(minIndex, 1);
+    while (!frontier.isEmpty()) {
+        let openNode = frontier.dequeue();
+        if (seen.has(openNode.stopIdx)) {
+            continue;
+        }
+        seen.add(openNode.stopIdx);
+        // console.log('exploring', openNode.stopIdx, 'with seen count', seen.size)
 
         let distToGoal = dist([openNode.lon, openNode.lat], intent.source);
-        // console.log('dist to goal is', distToGoal);
         if (distToGoal < allowRadius) {
             // We are done.
             return reconstruct(openNode);
@@ -104,12 +129,17 @@ export function pathFind(intent, busRoutes, stops) {
         // Find all trips that visited this bus stop already.
         let trips = Object.entries(busRoutes).filter(
             ([tripId, { stops, times }]) => {
-                let found = false;
                 for (let i = 1; i < stops.length; i++) {  // can't catch a bus that doesn't go anywhere
                     let stop = stops[i];
                     let time = times[i];
-                    if (stop != openNode.id || time > now || (now - time) > 10 * 60) {
-                        // either not the right stop or arrives too late or takes too long
+                    if (stop != openNode.stopIdx) {
+                        // trip doesn't visit this stop
+                        continue;
+                    } else if (time > now) {
+                        // trip arrives in the future
+                        continue;
+                    } else if ((now - time) > 100 * 60) {
+                        // trip takes too long
                         continue;
                     }
                     return true;
@@ -119,23 +149,32 @@ export function pathFind(intent, busRoutes, stops) {
         );
         // Each of these will have a g and an h.
         // The g is how long we have to wait plus existing g.
-        for ([tripId, {stops_, times_}] of Object.entries(trips)) {
+        for (const [tripId, tripDetails] of trips) {
+            const stops_ = tripDetails.stops;
+            const times_ = tripDetails.times;
             // h is the minimum distance from a bus stop on this trip to the goal...
             // times the walk speed, plus the time between stops.
-            let distances = stops_.map(s => dist([s.lon, s.lat], intent.destination));
+            let distances = stops_.map(s => dist([stops[s].lon, stops[s].lat], intent.destination));
             let argmin = indexOfMin(distances);
             let timeAtGoalStop = times_[argmin];
-            let baseH = Math.min(distances) * walkSpeed;
+            // baseH is how long it takes to walk from the best stop to home
+            let baseH = Math.min(...distances) * walkSpeed;
             for (let i = 1; i < stops_.length; i++) { // can't catch a bus that doesn't go anywhere
-                if (stops_[i] == openNode.id) {
+                if (stops_[i] == openNode.stopIdx) {
+                    // add all previous stops
+                    // timeDelta is how long we have between now and the time
+                    // that the bus arrived
                     let timeDelta = now - times_[i];
-                    // time to get to next stop including waiting for bus
-                    let g = openNode.g + timeDelta + (times_[i] - times[i - 1]);
-                    // time to get from next stop to home
-                    let h = baseH + (times_[i - 1] - timeAtGoalStop);
-                    // Then, just advance us to the next bus stop.
-                    let stop = stops[stops_[i - 1]]
-                    frontier.push(PFNodeStop(h, g, openNode, stop.lon, stop.lat, stops_[i - 1]));
+                    for (let j = i - 1; j >= 0; j--) {
+                        // time to get to stop j including waiting for bus
+                        let g = openNode.g + timeDelta + (times_[i] - times_[j]);
+                        // time to get from next stop to home
+                        let h = baseH + (times_[j] - timeAtGoalStop);
+                        // Then, just advance us to the next bus stop.
+                        let stop = stops[stops_[j]]
+                        frontier.enqueue(
+                            new PFNodeStop(h, g, openNode, stop.lon, stop.lat, stops_[j]));
+                    }
                 }
             }
         }
