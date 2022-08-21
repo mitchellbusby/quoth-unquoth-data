@@ -167,7 +167,16 @@ const CreateEditRoutes = ({
             gap: 8,
           }}
         >
-          <div>Creating route {state.routeName}</div>
+          <div>
+            Creating route{" "}
+            <input
+              type="text"
+              value={state.routeName}
+              onChange={(event) => {
+                dispatch({ type: "rename", routeName: event.target.value });
+              }}
+            />
+          </div>
           <div
             css={{
               fontSize: 14,
@@ -226,7 +235,7 @@ const CreateEditRoutes = ({
               onClick={() => {
                 dispatch({
                   type: "start",
-                  routeName: `Untitled ${savedRoutes.routes.length + 1}`,
+                  routeName: `Route ${savedRoutes.routes.length + 1 + 4000}`,
                 });
               }}
               css={{
@@ -296,7 +305,8 @@ type CreateRouteAction =
     }
   | { type: "start"; routeName?: string }
   | { type: "add-stop"; stop: { stopId: string; name: string } }
-  | { type: "remove-stop"; stopId: string };
+  | { type: "remove-stop"; stopId: string }
+  | { type: "rename"; routeName: string };
 
 export function createRouteReducer(
   state: CreateRouteState,
@@ -324,6 +334,12 @@ export function createRouteReducer(
       const stops = [...state.stops];
       remove(stops, (v) => v.stopId === action.stopId);
       return { ...state, stops };
+    }
+    case "rename": {
+      return {
+        ...state,
+        routeName: action.routeName,
+      };
     }
     case "finish": {
       // use finished value
