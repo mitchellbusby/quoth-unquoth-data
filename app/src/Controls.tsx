@@ -132,15 +132,22 @@ export const Controls = () => {
           </>
         )}
         {currentTab === "stats" && (
-          <div>
+          <div
+            css={{
+              display: "grid",
+              gap: 8,
+            }}
+          >
             <div>City statistics</div>
             <div
               css={{
                 fontSize: 14,
+                display: "grid",
+                gap: 4,
               }}
             >
-              <div>How many people couldn't get to their destination: </div>
-              <div>Average speed of citizens: </div>
+              <div>How many people couldn't get to their destination: XX</div>
+              <div>Average speed of citizens: XX</div>
             </div>
           </div>
         )}
