@@ -8,6 +8,7 @@
     "build": "yarn install && parcel build src/index.html --public-url /dist"
   },
   "dependencies": {
+    "@datastructures-js/priority-queue": "^6.1.2",
     "@emotion/babel-plugin": "^11.10.0",
     "@emotion/css": "^11.10.0",
     "@emotion/react": "^11.10.0",

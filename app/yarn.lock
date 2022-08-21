@@ -208,6 +208,18 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
+"@datastructures-js/heap@^4.0.2":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@datastructures-js/heap/-/heap-4.1.1.tgz#4017795d9ab9619859883d8bec185838eb47c63e"
+  integrity sha512-D3aP7XWgDxyPbfX36qFElJEAhaAX2sLlNmCSqzTjuJ+SD8eKXrPwcJigYTRTLJ7fSlOlFuT0zfdb66BGHR7y5Q==
+
+"@datastructures-js/priority-queue@^6.1.2":
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/@datastructures-js/priority-queue/-/priority-queue-6.1.2.tgz#4293d1086acc3c5184c3dd9ca390e7559eaf1f03"
+  integrity sha512-PE46Ica6a0PfQoVYszjjtzlBOW8Z50fKshmBncOEhufAoLgvQt37Yu1nfiKjn+3MlGZYUWqEWmyiFbz6qVjgEg==
+  dependencies:
+    "@datastructures-js/heap" "^4.0.2"
+
 "@emotion/babel-plugin@^11.10.0":
   version "11.10.0"
   resolved "https://registry.yarnpkg.com/@emotion/babel-plugin/-/babel-plugin-11.10.0.tgz#ae545b8faa6b42d3a50ec86b70b758296f3c4467"
