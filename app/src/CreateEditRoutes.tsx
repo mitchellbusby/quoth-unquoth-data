@@ -1,3 +1,5 @@
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cloneDeep, remove, sum } from "lodash";
 import { Coordinate, distance } from "ol/coordinate";
 import { fromLonLat } from "ol/proj";
@@ -112,7 +114,6 @@ const CreateEditRoutes = () => {
 
   return (
     <div>
-      <div>Create and edit routes</div>
       {state ? (
         <div>
           <div>Creating route {state.routeName}</div>
@@ -150,63 +151,83 @@ const CreateEditRoutes = () => {
           </div>
         </div>
       ) : (
-        <div>
-          <Button
-            onClick={() => {
-              dispatch({
-                type: "start",
-                routeName: `Untitled ${savedRoutes.routes.length + 1}`,
-              });
+        <div
+          css={{
+            display: "grid",
+            gap: 8,
+          }}
+        >
+          <div
+            css={{
+              display: "flex",
             }}
           >
-            Start route
-          </Button>
-          <div>Saved routes</div>
-          {savedRoutes.routes.length > 0 ? (
-            <div>
-              {savedRoutes.routes.map((route) => (
-                <div key={route.name}>
-                  <div>
-                    {route.name}{" "}
-                    <Button
-                      onClick={() => {
-                        const nextSavedRoutes = cloneDeep(savedRoutes);
-                        remove(
-                          nextSavedRoutes.routes,
-                          (r) => r.name === route.name
-                        );
-                        setSavedRoutes(nextSavedRoutes);
-                      }}
-                    >
-                      Delete
-                    </Button>
+            <div>Custom routes</div>
+            <Button
+              onClick={() => {
+                dispatch({
+                  type: "start",
+                  routeName: `Untitled ${savedRoutes.routes.length + 1}`,
+                });
+              }}
+              css={{
+                marginLeft: "auto",
+              }}
+            >
+              Create route
+            </Button>
+          </div>
+          <div
+            css={{
+              fontSize: 14,
+            }}
+          >
+            {savedRoutes.routes.length > 0 ? (
+              <div>
+                {savedRoutes.routes.map((route) => (
+                  <div key={route.name}>
+                    <div>
+                      {route.name}{" "}
+                      <Button
+                        onClick={() => {
+                          const nextSavedRoutes = cloneDeep(savedRoutes);
+                          remove(
+                            nextSavedRoutes.routes,
+                            (r) => r.name === route.name
+                          );
+                          setSavedRoutes(nextSavedRoutes);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </Button>
+                    </div>
+                    <ol>
+                      {route.stops.map((stop) => (
+                        <li key={stop.stopId}>
+                          {formatStopString(stop.stopId)}{" "}
+                          <Button
+                            onClick={() => {
+                              const stopLatLon = getStopLocation(
+                                parseInt(stop.stopId)
+                              );
+                              appState.olMapRef?.current?.getView().animate({
+                                zoom: 18,
+                                center: fromLonLat(stopLatLon),
+                              });
+                            }}
+                          >
+                            Show on map
+                          </Button>
+                        </li>
+                      ))}
+                    </ol>
                   </div>
-                  <ol>
-                    {route.stops.map((stop) => (
-                      <li key={stop.stopId}>
-                        {formatStopString(stop.stopId)}{" "}
-                        <Button
-                          onClick={() => {
-                            const stopLatLon = getStopLocation(
-                              parseInt(stop.stopId)
-                            );
-                            appState.olMapRef?.current?.getView().animate({
-                              zoom: 18,
-                              center: fromLonLat(stopLatLon),
-                            });
-                          }}
-                        >
-                          Center
-                        </Button>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>No routes saved</div>
-          )}
+                ))}
+              </div>
+            ) : (
+              <div>No routes saved</div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -89,6 +89,14 @@ export const Controls = () => {
           </Button>
           <Button onClick={() => setCurrentTab("goodies")}>Goodies</Button>
         </div>
+        <hr
+          css={{
+            borderBottom: "1px solid #c6c6c6",
+            borderTop: 0,
+            width: "100%",
+            margin: 0,
+          }}
+        />
         {currentTab === "custom-routes" && (
           <div>
             <CreateEditRoutes />
