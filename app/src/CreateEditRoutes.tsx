@@ -5,6 +5,13 @@ import { useLocalStorage } from "usehooks-ts";
 import { AppStateContext } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
+import { preProcessedStops } from "./processedTrips";
+
+// function generateTrips(route: SavedRoute) {
+//   const tripSegments = route.stops
+//     .slice(1)
+//     .map(({ stopId }, idx) => [route.stops[idx].stopId, stopId]);
+// }
 
 const CreateEditRoutes = () => {
   const appState = useContext(AppStateContext);
@@ -18,6 +25,9 @@ const CreateEditRoutes = () => {
   useEffect(() => {
     // Ensure saved routes are synced to the app states
     appState.savedBusRoutes = savedRoutes;
+    // todo: when I have generated trips, pre processed trips get smashed together
+    // with them.
+    appState.processedStops = preProcessedStops;
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {
@@ -147,6 +157,7 @@ export type SavedRoute = {
     stopId: string;
   }[];
   name: string;
+  // number: string;
   /**
    * todo: align fields to be with what the rest of the app has:
    * - bus frequency support
