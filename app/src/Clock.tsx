@@ -6,6 +6,7 @@ import { Button } from "./components/Button";
 import { css } from "@emotion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCalendarDay,
   faDownLeftAndUpRightToCenter,
   faPause,
   faPlay,
@@ -192,9 +193,25 @@ const Clock = () => {
           boxShadow: "var(--shadow-elevation-medium)",
           height: "fit-content",
           zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
         }}
       >
+        <label
+          css={{
+            fontSize: 14,
+            display: "flex",
+            gap: 4,
+            alignItems: "center",
+          }}
+          htmlFor="dayofweekselector"
+        >
+          <FontAwesomeIcon icon={faCalendarDay} />
+          Day of week
+        </label>
         <Select
+          id="dayofweekselector"
           value={dayOfWeek}
           onChange={(event) => {
             setDayOfWeek(event.target.value);
