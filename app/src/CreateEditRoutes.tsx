@@ -10,6 +10,7 @@ import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
 import defaultRoutes from "./data/routes.json";
+import { SavedRouteComponent } from "./SavedRoute";
 
 function generateTrips(route: SavedRoute): { [tripId: string]: Trip } {
   const tripSegments = route.stops
@@ -116,6 +117,7 @@ const CreateEditRoutes = () => {
           accum[tripId] = val;
           return accum;
         }, {}),
+
       routes: appState.savedBusRoutes.routes.reduce((prev, r) => {
         prev[r.name] = { 1: `(custom)` };
         return prev;
@@ -223,43 +225,12 @@ const CreateEditRoutes = () => {
             {savedRoutes.routes.length > 0 ? (
               <div>
                 {savedRoutes.routes.map((route) => (
-                  <div key={route.name}>
-                    <div>
-                      {route.name}{" "}
-                      <Button
-                        onClick={() => {
-                          const nextSavedRoutes = cloneDeep(savedRoutes);
-                          remove(
-                            nextSavedRoutes.routes,
-                            (r) => r.name === route.name
-                          );
-                          setSavedRoutes(nextSavedRoutes);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </Button>
-                    </div>
-                    <ol>
-                      {route.stops.map((stop) => (
-                        <li key={stop.stopId}>
-                          {formatStopString(stop.stopId)}{" "}
-                          <Button
-                            onClick={() => {
-                              const stopLatLon = getStopLocation(
-                                parseInt(stop.stopId)
-                              );
-                              appState.olMapRef?.current?.getView().animate({
-                                zoom: 18,
-                                center: fromLonLat(stopLatLon),
-                              });
-                            }}
-                          >
-                            Show on map
-                          </Button>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
+                  <SavedRouteComponent
+                    key={route.name}
+                    route={route}
+                    savedRoutes={savedRoutes}
+                    setSavedRoutes={setSavedRoutes}
+                  />
                 ))}
               </div>
             ) : (
