@@ -101,14 +101,17 @@ const CreateEditRoutes = () => {
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {
-    const nextSavedRoutes = cloneDeep(savedRoutes);
+    if (state.stops.length > 0) {
+      const nextSavedRoutes = cloneDeep(savedRoutes);
 
-    nextSavedRoutes.routes.push({
-      name: state.routeName,
-      stops: state.stops.map((m) => ({ stopId: m.stopId })),
-    });
+      nextSavedRoutes.routes.push({
+        name: state.routeName,
+        stops: state.stops.map((m) => ({ stopId: m.stopId })),
+      });
 
-    setSavedRoutes(nextSavedRoutes);
+      setSavedRoutes(nextSavedRoutes);
+    }
+
     dispatch({ type: "finish" });
   };
 
