@@ -32,7 +32,7 @@ const ControlsElement = styled.div(() => ({
 }));
 
 export const Controls = () => {
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useLocalStorage("controlshidden", false);
 
   const [selectedBusDistribution, setSelectedBus] =
     useLocalStorage<BusDistributionType>(
@@ -94,7 +94,9 @@ export const Controls = () => {
             value={selectedBusDistribution}
           >
             {BusList.map((bus) => (
-              <option value={bus.id}>{bus.label}</option>
+              <option key={bus.id} value={bus.id}>
+                {bus.label}
+              </option>
             ))}
           </Select>
         </div>

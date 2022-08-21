@@ -15,7 +15,6 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
-import busTrips from "./data/stop_times.json";
 import stops from "./data/stops.json";
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
@@ -89,32 +88,6 @@ function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   var ny = a[1] + (b[1] - a[1]) * frac;
   return [nx, ny];
 }
-
-/**
- * Gets all trips, and return wrapped values.
- */
-const getProcessedStops = (savedRoutes: SavedRoute[]) => {
-  return Object.fromEntries(
-    Object.entries(busTrips).map(([tripId, { stops, times }]) => {
-      const newTimes = [];
-      let prevTime = undefined;
-      for (let t of times) {
-        if (t <= 3 * 60 * 60) {
-          t += 24 * 60 * 60;
-        }
-        if (prevTime !== undefined && prevTime === t) {
-          newTimes.push(t + 25 + Math.random() * 10);
-        } else {
-          newTimes.push(t - Math.random() * 30);
-        }
-        prevTime = t;
-      }
-      return [tripId, { stops, times: newTimes }];
-    })
-  );
-};
-
-const processedStops = getProcessedStops();
 
 const OpenLayersMap = () => {
   const appState = useContext(AppStateContext);
@@ -201,8 +174,9 @@ const OpenLayersMap = () => {
 
     const drawAnimatedBusesFrame = () => {
       const timeOfDay = appState.frameCount;
+      const trips = appState.processedStops;
 
-      const coordinates = Object.entries(processedStops)
+      const coordinates = Object.entries(trips)
         .filter(([tripId]) => {
           // check day of the week first
           if (isSpecialDay(appState.dayOfWeek)) {
@@ -321,7 +295,7 @@ const OpenLayersMap = () => {
     return () => {
       map.dispose();
     };
-  }, [mapRef.current, popupRef.current]);
+  }, []);
 
   useEffect(() => {
     appState.olMapRef = olMapRef;

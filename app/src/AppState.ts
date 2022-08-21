@@ -2,7 +2,13 @@ import { Map } from "ol";
 import React from "react";
 import { BusDistributionType } from "./buses";
 import { SavedRoute } from "./CreateEditRoutes";
+import { preProcessedStops } from "./processedTrips";
 import { DEFAULT_DAY } from "./timeConfiguration";
+
+type Trip = {
+  stops: number[];
+  times: number[];
+};
 
 type AppState = {
   frameCount: number;
@@ -11,6 +17,9 @@ type AppState = {
   olMapRef?: React.MutableRefObject<Map>;
   savedBusRoutes: {
     routes: SavedRoute[];
+  };
+  processedStops: {
+    [tripId: string]: Trip;
   };
 };
 
@@ -21,6 +30,7 @@ const appState: AppState = {
   savedBusRoutes: {
     routes: [],
   },
+  processedStops: preProcessedStops,
 };
 
 const AppStateContext = React.createContext<AppState>(appState);
