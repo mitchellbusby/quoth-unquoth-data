@@ -26,6 +26,8 @@ const START_OF_DAY_IN_MINUTES = 9 * 60 * 60;
 const secondsInADay = 24 * 60 * 60;
 const secondsInAWeek = 7 * secondsInADay;
 
+const tickHistory = [];
+
 let lastTick = Date.now();
 
 const Clock = () => {
@@ -68,6 +70,10 @@ const Clock = () => {
         const nextTimeOfDay =
           timeOfDay + (tick - lastTick) / speedToValue(clockSpeed);
         lastTick = tick;
+        tickHistory.push(tick);
+        if (tickHistory.length > 120) {
+          tickHistory.shift();
+        }
 
         const overflow = nextTimeOfDay % (24 * 60 * 60);
 
@@ -147,6 +153,14 @@ const Clock = () => {
               </div>
             }
           />
+        </div>
+        <div>
+          {tickHistory.length
+            ? Math.floor(
+                (tickHistory.length * 1000) / (Date.now() - tickHistory[0])
+              )
+            : "Unknown"}{" "}
+          FPS
         </div>
         <div
           css={{

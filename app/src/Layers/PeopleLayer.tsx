@@ -1,5 +1,4 @@
-import { Coordinate } from "ol/coordinate";
-import Feature, { FeatureLike } from "ol/Feature";
+import Feature from "ol/Feature";
 import { Point } from "ol/geom";
 import Geometry from "ol/geom/Geometry";
 import { fromLonLat } from "ol/proj";
@@ -15,15 +14,8 @@ import {
 } from "../PeopleSim";
 import { getStopLocation } from "../utils/getStopLocation";
 import { AbstractLayer } from "./AbstractLayer";
-
-function doAsync<T>(x: () => T): Promise<T> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const val = x();
-      resolve(val);
-    }, 1);
-  });
-}
+import { doAsync } from "../utils/doAsync";
+import { polyLerp } from "../utils/polyLerp";
 
 export class PeopleLayer extends AbstractLayer<Geometry> {
   intents: Intent[];
@@ -48,18 +40,18 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
         pathFind(intent, routes, stops, cachedTripMap)
       );
       if (path) {
-        const startTime =
-          intent.arrivalTime - path.times.reduce((a, b) => a + b, 0);
+        const tripTime = path.times[0];
+        const startTime = intent.arrivalTime - tripTime;
         this.intents.push(intent);
         this.trips.push({
           ...path,
-          times: path.times.map((time) => startTime + time),
+          times: path.times.map((time) => startTime + tripTime - time),
         });
       }
     }
   }
 
-  getStyle(feature: FeatureLike, resolution: number): Style {
+  getStyle() {
     return new Style({
       image: new Circle({
         radius: 5,
@@ -68,44 +60,26 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
     });
   }
 
-  getFeatures(currentTime?: number): Feature<Geometry>[] {
+  getFeatures(currentTime?: number) {
     if (!currentTime) {
       return [];
     }
     return this.trips
       .map(({ stops, times }) => {
-        const where = times.filter((time) => currentTime >= time);
-        if (where.length > 0 && where.length < times.length) {
-          const [startTime, endTime] = [
-            times[where.length - 1],
-            times[where.length],
-          ];
-          const [startLoc, endLoc] = [
-            getStopLocation(stops[where.length - 1]),
-            getStopLocation(stops[where.length]),
-          ];
-
-          const lerpedCoordinate = fromLonLat(
-            interpolate(
-              startLoc,
-              endLoc,
-              (currentTime - startTime) / (endTime - startTime)
-            )
-          );
-
-          return new Feature({
-            geometry: new Point(lerpedCoordinate),
-            type: FeatureType.Person,
-          });
+        const waypoints = stops.map((stop, idx) => ({
+          location: getStopLocation(stop),
+          time: times[idx],
+        }));
+        const currentLocation = polyLerp(waypoints, currentTime);
+        if (!currentLocation) {
+          return undefined;
         }
-        return undefined;
-      })
-      .filter((x) => x) as Feature<Point>[];
-  }
-}
 
-function interpolate(a: Coordinate, b: Coordinate, frac: number) {
-  var nx = a[0] + (b[0] - a[0]) * frac;
-  var ny = a[1] + (b[1] - a[1]) * frac;
-  return [nx, ny];
+        return new Feature({
+          geometry: new Point(fromLonLat(currentLocation.location)),
+          type: FeatureType.Person,
+        });
+      })
+      .filter((x) => x);
+  }
 }

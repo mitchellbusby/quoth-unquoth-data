@@ -66,6 +66,7 @@ import { BusStopLayer } from "./Layers/BusStopLayer";
 import { FeatureType } from "./FeatureType";
 import { getStopLocation } from "./utils/getStopLocation";
 import { PeopleLayer } from "./Layers/PeopleLayer";
+import { polyLerp } from "./utils/polyLerp";
 
 function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
@@ -181,55 +182,40 @@ const OpenLayersMap = ({
       const timeOfDay = state.frameCount;
       const trips = state.processedStops;
 
+      const buses = Object.entries(trips).filter(([tripId]) => {
+        // check day of the week first
+        if (isSpecialDay(appState.dayOfWeek)) {
+          // check that it includes the specific day
+          return tripId.includes(appState.dayOfWeek);
+        } else {
+          // check if its a weekday trip
+          return tripId.includes("Weekday");
+        }
+      });
       const coordinates: {
         coordinate: Coordinate;
         direction: number;
         tripId: string;
-      }[] = Object.entries(trips)
-        .filter(([tripId]) => {
-          // check day of the week first
-          if (isSpecialDay(appState.dayOfWeek)) {
-            // check that it includes the specific day
-            return tripId.includes(appState.dayOfWeek);
-          } else {
-            // check if its a weekday trip
-            return tripId.includes("Weekday");
-          }
-        })
+      }[] = buses
         .map(([tripId, { stops, times }]) => {
-          const where = times.filter((time) => timeOfDay >= time);
-          if (where.length > 0 && where.length < times.length) {
-            const [startTime, endTime] = [
-              times[where.length - 1],
-              times[where.length],
-            ];
-            const [startLoc, endLoc] = [
-              getStopLocation(stops[where.length - 1]),
-              getStopLocation(stops[where.length]),
-            ];
+          const waypoints = stops.map((stop, idx) => ({
+            location: getStopLocation(stop),
+            time: times[idx],
+          }));
+          const position = polyLerp(waypoints, timeOfDay);
+          if (!position) return;
 
-            const lerpedCoordinate = fromLonLat(
-              interpolate(
-                startLoc,
-                endLoc,
-                (timeOfDay - startTime) / (endTime - startTime)
-              )
-            );
+          const coordinate = fromLonLat(position.location);
 
-            if (tripId === popup.get("tripId")) {
-              popup.setPosition(lerpedCoordinate);
-            }
-
-            return {
-              coordinate: lerpedCoordinate,
-              direction: Math.atan2(
-                endLoc[1] - startLoc[1],
-                endLoc[0] - startLoc[0]
-              ),
-              tripId,
-            };
+          if (tripId === popup.get("tripId")) {
+            popup.setPosition(coordinate);
           }
-          return undefined;
+
+          return {
+            coordinate: coordinate,
+            direction: position.direction,
+            tripId,
+          };
         })
         .filter(isDefined);
 
