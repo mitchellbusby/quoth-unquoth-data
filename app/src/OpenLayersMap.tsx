@@ -1,100 +1,16 @@
-import React, {
-  createRef,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Feature, Map, Overlay, View } from "ol";
-import TileLayer from "ol/layer/Tile";
-import OSM from "ol/source/OSM";
-import { fromLonLat, transform } from "ol/proj";
-import { Coordinate } from "ol/coordinate";
-import VectorSource from "ol/source/Vector";
+import { Map, Overlay, View } from "ol";
 import { Point } from "ol/geom";
-import { Style, Icon } from "ol/style";
-
-import stops from "./data/stops.json";
-import busRoutes from "./data/stop_times.json";
-import VectorLayer from "ol/layer/Vector";
-import Bus from "./static/bus.png";
-import RightBus from "./static/right-bus.png";
-import OldBus from "./static/bus_old.png";
-import RightOldBus from "./static/right-bus_old.png";
-import LongBus from "./static/bus_long.png";
-import RightLongBus from "./static/right-bus_long.png";
-import BlueBus from "./static/bus_blue.png";
-import RightBlueBus from "./static/right-bus_blue.png";
-import PrideBus from "./static/bus_pride.png";
-import RightPrideBus from "./static/right-bus_pride.png";
-
-const busTypes = {
-  new: {
-    prob: 63,
-    left: new Style({ image: new Icon({ src: Bus }) }),
-    right: new Style({ image: new Icon({ src: RightBus }) }),
-  },
-  old: {
-    prob: 23,
-    left: new Style({ image: new Icon({ src: OldBus }) }),
-    right: new Style({ image: new Icon({ src: RightOldBus }) }),
-  },
-  long: {
-    prob: 8,
-    left: new Style({ image: new Icon({ src: LongBus }) }),
-    right: new Style({ image: new Icon({ src: RightLongBus }) }),
-  },
-  blue: {
-    prob: 5,
-    left: new Style({ image: new Icon({ src: BlueBus }) }),
-    right: new Style({ image: new Icon({ src: RightBlueBus }) }),
-  },
-  pride: {
-    prob: 1,
-    left: new Style({ image: new Icon({ src: PrideBus }) }),
-    right: new Style({ image: new Icon({ src: RightPrideBus }) }),
-  },
-};
-import { AppState, AppStateContext } from "./AppState";
-import BusStop from "./static/stop.png";
-import { isSpecialDay } from "./timeConfiguration";
-import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
-import { CreateRouteContext, SavedRoute } from "./CreateEditRoutes";
-import { StyleLike } from "ol/style/Style";
-import { BusStopLayer } from "./Layers/BusStopLayer";
+import TileLayer from "ol/layer/Tile";
+import { fromLonLat } from "ol/proj";
+import OSM from "ol/source/OSM";
+import { useContext, useEffect, useRef } from "react";
+import { AppState } from "./AppState";
+import { CreateRouteContext } from "./CreateEditRoutes";
 import { FeatureType } from "./FeatureType";
-import { getStopLocation } from "./utils/getStopLocation";
+import { BusStopLayer } from "./Layers/BusStopLayer";
 import { PeopleLayer } from "./Layers/PeopleLayer";
-import { polyLerp } from "./utils/polyLerp";
-
-function isDefined<T>(val: T | undefined | null): val is T {
-  return val !== undefined && val !== null;
-}
-
-const busStopStyle: StyleLike = (feature, resolution) => {
-  console.log(resolution);
-  // const scaleValue = 1 / Math.pow(resolution, 1 / 3)
-  const scaleValue = 2;
-  return new Style({
-    image: new Icon({ src: BusStop, scale: scaleValue }),
-  });
-};
-function hashCode(value: string) {
-  var hash = 0,
-    i = 0,
-    len = value.length;
-  while (i < len) {
-    hash = ((hash << 5) - hash + value.charCodeAt(i++)) << 0;
-  }
-  return hash;
-}
-
-function interpolate(a: Coordinate, b: Coordinate, frac: number) {
-  var nx = a[0] + (b[0] - a[0]) * frac;
-  var ny = a[1] + (b[1] - a[1]) * frac;
-  return [nx, ny];
-}
+import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
+import { BusLayer } from "./Layers/BusLayer";
 
 const OpenLayersMap = ({
   peopleLayer,
@@ -116,46 +32,8 @@ const OpenLayersMap = ({
     console.log("woah nelly");
 
     const center = fromLonLat([149.131, -35.2802]);
-
-    const busesSource = new VectorSource();
-    const busesLayer = new VectorLayer({
-      source: busesSource,
-      style: (feature) => {
-        const properties = feature.getProperties();
-        if (properties.type === FeatureType.Bus) {
-          let option: keyof typeof busTypes = "new";
-
-          if (appState.busDistribution === "pride") {
-            option = "pride";
-          } else {
-            const roll = Math.abs(hashCode(properties.tripId) % 100);
-            let cumsum = 0;
-            const options = Object.keys(busTypes);
-            option = options.pop() as keyof typeof busTypes;
-            while (roll > cumsum && options.length) {
-              option = options.pop() as keyof typeof busTypes;
-              cumsum += busTypes[option].prob;
-            }
-          }
-
-          let rotation = (2 * Math.PI - properties.orientation) % (2 * Math.PI);
-          let style;
-          if (rotation >= Math.PI / 2 && rotation <= (3 * Math.PI) / 2) {
-            style = busTypes[option].right.clone();
-            rotation += Math.PI;
-          } else {
-            style = busTypes[option].left.clone();
-          }
-
-          const image = style.getImage();
-          //image.setRotation(rotation);
-
-          return style;
-        }
-      },
-    });
-
-    const busStopLayer = new BusStopLayer();
+    const busLayer = new BusLayer(appState);
+    const layers = [new BusStopLayer(), busLayer, peopleLayer];
 
     const map = new Map({
       target: "map",
@@ -165,9 +43,7 @@ const OpenLayersMap = ({
             url: "https://a.tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38",
           }),
         }),
-        busStopLayer.layer,
-        busesLayer,
-        peopleLayer.layer,
+        ...layers.map(({ layer }) => layer),
       ],
       view: new View({
         center: center,
@@ -177,89 +53,29 @@ const OpenLayersMap = ({
 
     olMapRef.current = map;
 
-    const drawAnimatedBusesFrame = () => {
-      const state = appState;
-      const timeOfDay = state.frameCount;
-      const trips = state.processedStops;
-
-      const buses = Object.entries(trips).filter(([tripId]) => {
-        // check day of the week first
-        if (isSpecialDay(appState.dayOfWeek)) {
-          // check that it includes the specific day
-          return tripId.includes(appState.dayOfWeek);
-        } else {
-          // check if its a weekday trip
-          return tripId.includes("Weekday");
-        }
-      });
-      const coordinates: {
-        coordinate: Coordinate;
-        direction: number;
-        tripId: string;
-      }[] = buses
-        .map(([tripId, { stops, times }]) => {
-          const waypoints = stops.map((stop, idx) => ({
-            location: getStopLocation(stop),
-            time: times[idx],
-          }));
-          const position = polyLerp(waypoints, timeOfDay);
-          if (!position) return;
-
-          const coordinate = fromLonLat(position.location);
-
-          if (tripId === popup.get("tripId")) {
-            popup.setPosition(coordinate);
-          }
-
-          return {
-            coordinate: coordinate,
-            direction: position.direction,
-            tripId,
-          };
-        })
-        .filter(isDefined);
-
-      busesSource.clear();
-      busesSource.addFeatures(
-        coordinates.map(
-          (m) =>
-            new Feature({
-              geometry: new Point(m.coordinate),
-              orientation: m.direction,
-              type: FeatureType.Bus,
-              tripId: m.tripId,
-            })
-        )
-      );
-
-      /**
-       * If there's no matching trip ID anymore, clear
-       * the popup.
-       */
-      if (
-        popup.get("tripId") &&
-        !busesSource
-          .getFeatures()
-          .find((f) => f.get("tripId") === popup.get("tripId"))
-      ) {
-        popup.setPosition(undefined);
-      }
-    };
-
     const popup = new Overlay({
       element: popupRef.current,
     });
 
     map.addOverlay(popup);
     map.on("postrender", () => {
-      peopleLayer.draw(appState.frameCount);
-      drawAnimatedBusesFrame();
+      layers.forEach((layer) => layer.draw(appState.frameCount));
+      busLayer.features;
+      if (popup.get("tripId")) {
+        if (busLayer.features[popup.get("tripId")]) {
+          popup.setPosition(
+            busLayer.features[popup.get("tripId")]
+              .getGeometry()
+              .getCoordinates()
+          );
+        } else {
+          popup.setPosition(undefined);
+        }
+      }
       map.render();
     });
 
-    busStopLayer.draw();
-    peopleLayer.draw(appState.frameCount);
-    drawAnimatedBusesFrame();
+    layers.forEach((layer) => layer.draw(appState.frameCount));
     map.render();
 
     map.on("click", function (evt) {

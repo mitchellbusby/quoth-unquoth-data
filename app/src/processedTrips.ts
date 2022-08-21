@@ -1,4 +1,5 @@
 import busTrips from "./data/stop_times.json";
+import { getStopLocation } from "./utils/getStopLocation";
 /**
  * Gets all trips, and return wrapped values.
  */
@@ -18,7 +19,14 @@ const getProcessedStops = () => {
         }
         prevTime = t;
       }
-      return [tripId, { stops, times: newTimes }];
+      return [
+        tripId,
+        {
+          stops,
+          stopLocations: stops.map((stop) => getStopLocation(stop)),
+          times: newTimes,
+        },
+      ];
     })
   );
 };

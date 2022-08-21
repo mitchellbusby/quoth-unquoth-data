@@ -154,7 +154,16 @@ const Clock = () => {
             }
           />
         </div>
-        <div>
+        <div
+          css={{
+            position: "fixed",
+            bottom: 8,
+            left: 8,
+            fontSize: 14,
+            color: "black",
+            opacity: 0.8,
+          }}
+        >
           {tickHistory.length
             ? Math.floor(
                 (tickHistory.length * 1000) / (Date.now() - tickHistory[0])

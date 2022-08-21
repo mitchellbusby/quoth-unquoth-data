@@ -64,22 +64,27 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
     if (!currentTime) {
       return [];
     }
-    return this.trips
-      .map(({ stops, times }) => {
-        const waypoints = stops.map((stop, idx) => ({
-          location: getStopLocation(stop),
-          time: times[idx],
-        }));
-        const currentLocation = polyLerp(waypoints, currentTime);
-        if (!currentLocation) {
-          return undefined;
-        }
+    return Object.fromEntries(
+      this.trips
+        .map(({ stops, times }, pid) => {
+          const waypoints = stops.map((stop, idx) => ({
+            location: getStopLocation(stop),
+            time: times[idx],
+          }));
+          const currentLocation = polyLerp(waypoints, currentTime);
+          if (!currentLocation) {
+            return undefined;
+          }
 
-        return new Feature({
-          geometry: new Point(fromLonLat(currentLocation.location)),
-          type: FeatureType.Person,
-        });
-      })
-      .filter((x) => x);
+          return [
+            pid,
+            new Feature({
+              geometry: new Point(fromLonLat(currentLocation.location)),
+              type: FeatureType.Person,
+            }),
+          ];
+        })
+        .filter((x) => x)
+    );
   }
 }

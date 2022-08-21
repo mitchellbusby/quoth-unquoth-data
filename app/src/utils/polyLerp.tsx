@@ -30,7 +30,10 @@ export function polyLerp(
     when > waypoints[0].time &&
     when < waypoints[waypoints.length - 1].time
   ) {
-    const [start, end] = binarySearch(waypoints, when);
+    // const [start, end] = binarySearch(waypoints, when);
+    // turns out this is faster than the binary search
+    const where = waypoints.filter((waypoint) => when >= waypoint.time).length;
+    const [start, end] = [waypoints[where - 1], waypoints[where]];
 
     return {
       location: interpolate(

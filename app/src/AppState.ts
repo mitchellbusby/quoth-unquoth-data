@@ -5,9 +5,11 @@ import { SavedRoute } from "./CreateEditRoutes";
 import { preProcessedStops } from "./processedTrips";
 import { DEFAULT_DAY } from "./timeConfiguration";
 import defaultRoutes from "./data/routes.json";
+import { Coordinate } from "ol/coordinate";
 
 export type Trip = {
   stops: number[];
+  stopLocations: Coordinate[];
   times: number[];
 };
 

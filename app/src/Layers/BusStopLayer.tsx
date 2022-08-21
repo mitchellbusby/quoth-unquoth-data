@@ -27,16 +27,21 @@ export class BusStopLayer extends AbstractLayer<Geometry> {
   }
 
   getFeatures() {
-    return Object.keys(stops).map((stop) => {
-      const stopLocation = getStopLocation(parseInt(stop));
-      const stopName = stops[stop].name;
+    return Object.fromEntries(
+      Object.keys(stops).map((stop) => {
+        const stopLocation = getStopLocation(parseInt(stop));
+        const stopName = stops[stop].name;
 
-      return new Feature({
-        geometry: new Point(fromLonLat(stopLocation)),
-        type: FeatureType.BusStop,
-        stopId: stop,
-        stopName,
-      });
-    });
+        return [
+          stop,
+          new Feature({
+            geometry: new Point(fromLonLat(stopLocation)),
+            type: FeatureType.BusStop,
+            stopId: stop,
+            stopName,
+          }),
+        ];
+      })
+    );
   }
 }

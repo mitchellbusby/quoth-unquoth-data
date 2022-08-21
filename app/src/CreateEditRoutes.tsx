@@ -36,6 +36,9 @@ function generateTrips(route: SavedRoute): TripCollection {
     for (let i = 0; i < possibleTrips; i++) {
       trips.push({
         stops: route.stops.map(({ stopId }) => parseInt(stopId)),
+        stopLocations: route.stops.map(({ stopId }) =>
+          getStopLocation(parseInt(stopId))
+        ),
         times: tripDurations.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]
@@ -52,6 +55,10 @@ function generateTrips(route: SavedRoute): TripCollection {
     for (let i = 0; i < possibleTrips; i++) {
       trips.push({
         stops: stops.map(({ stopId }) => parseInt(stopId)),
+        stopLocations: stops.map(({ stopId }) =>
+          getStopLocation(parseInt(stopId))
+        ),
+
         times: times.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]
@@ -62,6 +69,10 @@ function generateTrips(route: SavedRoute): TripCollection {
       times.reverse();
       trips.push({
         stops: stops.map(({ stopId }) => parseInt(stopId)),
+        stopLocations: stops.map(({ stopId }) =>
+          getStopLocation(parseInt(stopId))
+        ),
+
         times: times.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]

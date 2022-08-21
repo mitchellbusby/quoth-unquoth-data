@@ -3,6 +3,7 @@ import { PriorityQueue } from "@datastructures-js/priority-queue";
 import { Coordinate, distance } from "ol/coordinate";
 import { Trip, TripCollection } from "./AppState";
 import seedrandom from "seedrandom";
+import { getStopLocation } from "./utils/getStopLocation";
 
 export interface Intent {
   source: Coordinate;
@@ -84,7 +85,11 @@ function reconstruct(node: PFNodeStop | undefined): Trip {
     times.push(node.g);
     node = node.parent as PFNodeStop | undefined;
   }
-  return { stops, times };
+  return {
+    stops,
+    times,
+    stopLocations: stops.map((stop) => getStopLocation(stop)),
+  };
 }
 /*
 function hasNode(nodes, node) {

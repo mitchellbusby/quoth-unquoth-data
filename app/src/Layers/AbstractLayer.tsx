@@ -4,24 +4,27 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Style from "ol/style/Style";
 
+type FeatureCollection<T extends Geometry> = { [id: string]: Feature<T> };
+
 export abstract class AbstractLayer<T extends Geometry> {
   source: VectorSource<T>;
   layer: VectorLayer<VectorSource<T>>;
-  features: { [id: string]: Feature<T> };
+  features: FeatureCollection<T>;
 
   constructor() {
     this.source = new VectorSource();
     this.layer = new VectorLayer({
       source: this.source,
-      style: this.getStyle,
+      style: (...params) => this.getStyle(...params),
     });
   }
 
   abstract getStyle(feature: FeatureLike, resolution: number): Style;
-  abstract getFeatures(currentTime?: number): Feature<T>[];
+  abstract getFeatures(currentTime?: number): FeatureCollection<T>;
 
   draw(currentTime?: number) {
     this.source.clear();
-    this.source.addFeatures(this.getFeatures(currentTime));
+    this.features = this.getFeatures(currentTime);
+    this.source.addFeatures(Object.values(this.features));
   }
 }
