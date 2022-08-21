@@ -140,7 +140,7 @@ const CreateEditRoutes = ({
         ...customRoutesAndTrips.routes,
       },
     };
-    updateRoutes(appState.processedStops, stops);
+    setTimeout(() => updateRoutes(appState.processedStops, stops), 0);
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {

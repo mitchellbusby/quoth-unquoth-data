@@ -18,6 +18,15 @@ import {
 import { getStopLocation } from "../utils/getStopLocation";
 import { AbstractLayer } from "./AbstractLayer";
 
+function doAsync<T>(x: () => T): Promise<T> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const val = x();
+      resolve(val);
+    }, 0);
+  });
+}
+
 export class PeopleLayer extends AbstractLayer<Geometry> {
   intents: Intent[];
   cachedTripMap: TripTimeMap;
@@ -27,24 +36,33 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
 
   constructor(routes: TripCollection, stops: StopCollection) {
     super();
-    this.refresh(routes, stops);
+    this.cachedTripMap = [];
+    this.intents = [];
+    this.trips = [];
+    setTimeout(() => this.refresh(routes, stops), 0);
   }
 
-  refresh(routes: TripCollection, stops: StopCollection) {
+  async refresh(routes: TripCollection, stops: StopCollection) {
     const peopleCount = range(0, this.sample);
-    this.cachedTripMap = generateCachedTripMap(routes, stops);
-    this.intents = peopleCount.map((id) => getIntent(id));
-    this.trips = this.intents
-      .map((intent) => {
-        const path = pathFind(intent, routes, stops, this.cachedTripMap);
-        if (!path) {
-          return;
-        }
+    const cachedTripMap = generateCachedTripMap(routes, stops);
+    const intents = peopleCount.map((id) => getIntent(id));
+    const trips: Trip[] = [];
+    for (const intent of this.intents) {
+      const path = await doAsync(() =>
+        pathFind(intent, routes, stops, this.cachedTripMap)
+      );
+      if (path) {
         const startTime =
           intent.arrivalTime - path.times.reduce((a, b) => a + b, 0);
-        return { ...path, times: path.times.map((time) => startTime + time) };
-      })
-      .filter((x) => x) as Trip[];
+        trips.push({
+          ...path,
+          times: path.times.map((time) => startTime + time),
+        });
+      }
+    }
+    this.cachedTripMap = cachedTripMap;
+    this.intents = intents;
+    this.trips = trips;
     console.log(this.trips);
   }
 
