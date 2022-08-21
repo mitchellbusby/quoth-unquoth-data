@@ -35,9 +35,9 @@ const ControlsElement = styled.div(() => ({
 export const Controls = () => {
   const [hidden, setHidden] = useLocalStorage("controlshidden", false);
 
-  const [currentTab, setCurrentTab] = useState<"custom-routes" | "goodies">(
-    "custom-routes"
-  );
+  const [currentTab, setCurrentTab] = useState<
+    "custom-routes" | "goodies" | "stats"
+  >("custom-routes");
 
   const [selectedBusDistribution, setSelectedBus] =
     useLocalStorage<BusDistributionType>(
@@ -87,6 +87,7 @@ export const Controls = () => {
           <Button onClick={() => setCurrentTab("custom-routes")}>
             Custom routes
           </Button>
+          <Button onClick={() => setCurrentTab("stats")}>Stats</Button>
           <Button onClick={() => setCurrentTab("goodies")}>Goodies</Button>
         </div>
         <hr
@@ -130,6 +131,7 @@ export const Controls = () => {
             </div>
           </>
         )}
+        {currentTab === "stats" && <div>Add your stats here</div>}
       </ControlsElement>
       <ClassNames>
         {({ css }) => (
