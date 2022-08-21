@@ -63,7 +63,7 @@ const busTypes = {
     right: new Style({ image: new Icon({ src: RightPrideBus }) }),
   },
 };
-import { AppStateContext } from "./AppState";
+import { AppState, AppStateContext } from "./AppState";
 import BusStop from "./static/stop.png";
 import { isSpecialDay } from "./timeConfiguration";
 import { getRouteNameFromNumber, getRouteNumberFromId } from "./utils/routes";
@@ -98,9 +98,13 @@ function interpolate(a: Coordinate, b: Coordinate, frac: number) {
   return [nx, ny];
 }
 
-const OpenLayersMap = () => {
-  const appState = useContext(AppStateContext);
-
+const OpenLayersMap = ({
+  peopleLayer,
+  appState,
+}: {
+  peopleLayer: PeopleLayer;
+  appState: AppState;
+}) => {
   const [_, dispatchCreateRouteUpdate] = useContext(CreateRouteContext);
   const mapRef = useRef<HTMLDivElement>();
   const popupRef = useRef<HTMLDivElement>();
@@ -153,8 +157,6 @@ const OpenLayersMap = () => {
     });
 
     const busStopLayer = new BusStopLayer();
-
-    const peopleLayer = new PeopleLayer(appState.processedStops, stops);
 
     const osmCyclingLayer = new TileLayer({
       source: new OSM({

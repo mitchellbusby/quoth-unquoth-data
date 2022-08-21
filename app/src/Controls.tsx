@@ -15,6 +15,11 @@ import { Button } from "./components/Button";
 import { Select } from "./components/Select";
 import { ClassNames } from "@emotion/react";
 import { CreateEditRoutes } from "./CreateEditRoutes";
+import { PeopleLayer } from "./Layers/PeopleLayer";
+import { getStopLocation } from "./utils/getStopLocation";
+
+import allpops from "./data/allpops.json";
+import { distance } from "ol/coordinate";
 
 const ControlsElement = styled.div(() => ({
   background: "white",
@@ -32,7 +37,7 @@ const ControlsElement = styled.div(() => ({
   gap: "var(--space-m)",
 }));
 
-export const Controls = () => {
+export const Controls = ({ peopleLayer }: { peopleLayer: PeopleLayer }) => {
   const [hidden, setHidden] = useLocalStorage("controlshidden", false);
 
   const [currentTab, setCurrentTab] = useState<
@@ -146,8 +151,24 @@ export const Controls = () => {
                 gap: 4,
               }}
             >
-              <div>How many people couldn't get to their destination: XX</div>
-              <div>Average speed of citizens: XX</div>
+              <div>
+                How many people couldn't get to their destination:{" "}
+                {(1 - peopleLayer.trips.length / peopleLayer.sample) * 100}%
+              </div>
+              <div>
+                Average speed of citizens:{" "}
+                {peopleLayer.trips
+                  .map((trip) => trip.times[0])
+                  .reduce((a, b) => a + b, 0) /
+                  peopleLayer.trips
+                    .map((trip) =>
+                      distance(
+                        getStopLocation(trip.stops[0]),
+                        getStopLocation(trip.stops[trip.stops.length - 1])
+                      )
+                    )
+                    .reduce((a, b) => a + b, 0)}
+              </div>
             </div>
           </div>
         )}

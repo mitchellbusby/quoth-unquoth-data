@@ -13,7 +13,7 @@ export type Trip = {
 
 export type TripCollection = { [tripId: string]: Trip };
 
-type AppState = {
+export type AppState = {
   frameCount: number;
   dayOfWeek: string;
   busDistribution: BusDistributionType;
