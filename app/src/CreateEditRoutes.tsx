@@ -1,4 +1,5 @@
 import { cloneDeep, remove } from "lodash";
+import { Coordinate, distance } from "ol/coordinate";
 import { fromLonLat } from "ol/proj";
 import React, { createContext, useContext, useEffect, useReducer } from "react";
 import { useLocalStorage } from "usehooks-ts";
@@ -7,11 +8,18 @@ import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
 
-// function generateTrips(route: SavedRoute) {
-//   const tripSegments = route.stops
-//     .slice(1)
-//     .map(({ stopId }, idx) => [route.stops[idx].stopId, stopId]);
-// }
+function generateTrips(route: SavedRoute) {
+  const tripSegments = route.stops
+    .slice(1)
+    .map(({ stopId }, idx) => [
+      parseInt(route.stops[idx].stopId),
+      parseInt(stopId),
+    ]);
+  const tripDurations = tripSegments.map(([startId, stopId]) => {
+    const d = distance(getStopLocation(startId), getStopLocation(stopId));
+    return 15 + Math.ceil(Math.random() * 5);
+  });
+}
 
 const CreateEditRoutes = () => {
   const appState = useContext(AppStateContext);
@@ -145,7 +153,7 @@ const CreateEditRoutes = () => {
   );
 };
 
-function getStopLocation(stopId: number) {
+function getStopLocation(stopId: number): Coordinate {
   return [stops[stopId].lon, stops[stopId].lat];
 }
 
