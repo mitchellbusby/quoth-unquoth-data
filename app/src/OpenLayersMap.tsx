@@ -15,7 +15,15 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
+import {getIntent, pathFind, generateCachedTripMap} from "./PeopleSim";
+window.getIntent = getIntent;
+window.pathFind = pathFind;
+window.generateCachedTripMap = generateCachedTripMap;
+
 import stops from "./data/stops.json";
+import busRoutes from "./data/stop_times.json";
+window.stops = stops;
+window.busRoutes = busRoutes;
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
 import RightBus from "./static/right-bus.png";

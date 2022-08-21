@@ -84,7 +84,22 @@ function hasNode(nodes, node) {
     return false;
 }
 
-export function pathFind(intent, busRoutes, stops) {
+export function generateCachedTripMap(busRoutes, stops) {
+    const routeEntries = Object.entries(busRoutes);
+    // map stop -> [(trip, time)]
+    let stopTripTimeMap = {};
+    for (let stop of Object.keys(stops)) {
+        stopTripTimeMap[stop] = [];
+    }
+    for (const [tripId, {stops, times}] of routeEntries) {
+        for (let i = 0; i < stops.length; i++) {
+            stopTripTimeMap[stops[i]].push([tripId, times[i]]);
+        }
+    }
+    return stopTripTimeMap;
+}
+
+export function pathFind(intent, busRoutes, stops, cachedTripMap) {
     // Pathfind backwards...
     const allowRadius = 0.005; // 500m
     const walkSpeed = 88650; // s/deg
@@ -97,8 +112,10 @@ export function pathFind(intent, busRoutes, stops) {
           return 1;
         }
     });
+    const stopTripTimeMap = cachedTripMap;
     let seen = new Set();
-    for (let [id, s] of Object.entries(stops)) {
+    for (let id in stops) {
+        let s = stops[id];
         let distance = dist([s.lon, s.lat], intent.destination);
         if (distance > allowRadius) {
             // Too far!
@@ -127,29 +144,17 @@ export function pathFind(intent, busRoutes, stops) {
         // For each connecting bus route that arrives before the current time...
         let now = intent.arrivalTime - openNode.g;
         // Find all trips that visited this bus stop already.
-        let trips = Object.entries(busRoutes).filter(
-            ([tripId, { stops, times }]) => {
-                for (let i = 1; i < stops.length; i++) {  // can't catch a bus that doesn't go anywhere
-                    let stop = stops[i];
-                    let time = times[i];
-                    if (stop != openNode.stopIdx) {
-                        // trip doesn't visit this stop
-                        continue;
-                    } else if (time > now) {
-                        // trip arrives in the future
-                        continue;
-                    } else if ((now - time) > 100 * 60) {
-                        // trip takes too long
-                        continue;
-                    }
-                    return true;
-                }
-                return false; // bus doesn't visit this stop (or visits it too late)
+        let goodTrips = [];
+        for (const [trip, time] of stopTripTimeMap[openNode.stopIdx]) {
+            if (time <= now && ((now - time) < 10 * 60)) {
+                // trip is at a good time to board
+                goodTrips.push([trip, time]);
             }
-        );
+        }
         // Each of these will have a g and an h.
         // The g is how long we have to wait plus existing g.
-        for (const [tripId, tripDetails] of trips) {
+        for (const [tripId, stopTime] of goodTrips) {
+            const tripDetails = busRoutes[tripId];
             const stops_ = tripDetails.stops;
             const times_ = tripDetails.times;
             // h is the minimum distance from a bus stop on this trip to the goal...
