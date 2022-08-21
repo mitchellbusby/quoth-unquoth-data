@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import {
+  faSliders,
   faWandMagicSparkles,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
@@ -145,10 +146,7 @@ export const Controls = () => {
                   setHidden(false);
                 }}
               >
-                <FontAwesomeIcon
-                  icon={faWandMagicSparkles}
-                  size="lg"
-                ></FontAwesomeIcon>
+                <FontAwesomeIcon icon={faSliders} size="lg"></FontAwesomeIcon>
               </Button>
             </div>
           </CSSTransition>
