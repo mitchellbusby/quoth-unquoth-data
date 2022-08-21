@@ -7,6 +7,7 @@ import Style from "ol/style/Style";
 export abstract class AbstractLayer<T extends Geometry> {
   source: VectorSource<T>;
   layer: VectorLayer<VectorSource<T>>;
+  features: { [id: string]: Feature<T> };
 
   constructor() {
     this.source = new VectorSource();

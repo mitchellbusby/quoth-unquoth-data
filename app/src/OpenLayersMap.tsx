@@ -15,15 +15,8 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
-import { getIntent, pathFind, generateCachedTripMap } from "./PeopleSim";
-window.getIntent = getIntent;
-window.pathFind = pathFind;
-window.generateCachedTripMap = generateCachedTripMap;
-
 import stops from "./data/stops.json";
 import busRoutes from "./data/stop_times.json";
-window.stops = stops;
-window.busRoutes = busRoutes;
 import VectorLayer from "ol/layer/Vector";
 import Bus from "./static/bus.png";
 import RightBus from "./static/right-bus.png";
@@ -74,6 +67,10 @@ import { FeatureType } from "./FeatureType";
 import { getStopLocation } from "./utils/getStopLocation";
 import { PeopleLayer } from "./Layers/PeopleLayer";
 
+function isDefined<T>(val: T | undefined | null): val is T {
+  return val !== undefined && val !== null;
+}
+
 const busStopStyle: StyleLike = (feature, resolution) => {
   console.log(resolution);
   // const scaleValue = 1 / Math.pow(resolution, 1 / 3)
@@ -106,8 +103,8 @@ const OpenLayersMap = ({
   appState: AppState;
 }) => {
   const [_, dispatchCreateRouteUpdate] = useContext(CreateRouteContext);
-  const mapRef = useRef<HTMLDivElement>();
-  const popupRef = useRef<HTMLDivElement>();
+  const mapRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   const olMapRef = useRef<Map>();
 
@@ -125,7 +122,7 @@ const OpenLayersMap = ({
       style: (feature) => {
         const properties = feature.getProperties();
         if (properties.type === FeatureType.Bus) {
-          let option = undefined;
+          let option: keyof typeof busTypes = "new";
 
           if (appState.busDistribution === "pride") {
             option = "pride";
@@ -133,9 +130,9 @@ const OpenLayersMap = ({
             const roll = Math.abs(hashCode(properties.tripId) % 100);
             let cumsum = 0;
             const options = Object.keys(busTypes);
-            option = options.pop();
-            while (roll > cumsum) {
-              option = options.pop();
+            option = options.pop() as keyof typeof busTypes;
+            while (roll > cumsum && options.length) {
+              option = options.pop() as keyof typeof busTypes;
               cumsum += busTypes[option].prob;
             }
           }
@@ -159,13 +156,6 @@ const OpenLayersMap = ({
 
     const busStopLayer = new BusStopLayer();
 
-    const osmCyclingLayer = new TileLayer({
-      source: new OSM({
-        url: "https://b.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png",
-        opaque: false,
-      }),
-    });
-
     const map = new Map({
       target: "map",
       layers: [
@@ -174,7 +164,6 @@ const OpenLayersMap = ({
             url: "https://a.tile.thunderforest.com/transport/{z}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38",
           }),
         }),
-        // osmCyclingLayer,
         busStopLayer.layer,
         busesLayer,
         peopleLayer.layer,
@@ -192,7 +181,11 @@ const OpenLayersMap = ({
       const timeOfDay = state.frameCount;
       const trips = state.processedStops;
 
-      const coordinates = Object.entries(trips)
+      const coordinates: {
+        coordinate: Coordinate;
+        direction: number;
+        tripId: string;
+      }[] = Object.entries(trips)
         .filter(([tripId]) => {
           // check day of the week first
           if (isSpecialDay(appState.dayOfWeek)) {
@@ -238,7 +231,7 @@ const OpenLayersMap = ({
           }
           return undefined;
         })
-        .filter((x) => x);
+        .filter(isDefined);
 
       busesSource.clear();
       busesSource.addFeatures(
@@ -297,7 +290,10 @@ const OpenLayersMap = ({
             routeNumber,
             appState.routes
           );
-          popupRef.current.innerText = `${routeNumber}: ${routeName}`;
+
+          if (popupRef.current) {
+            popupRef.current.innerText = `${routeNumber}: ${routeName}`;
+          }
 
           popup.set("tripId", tripId);
         }

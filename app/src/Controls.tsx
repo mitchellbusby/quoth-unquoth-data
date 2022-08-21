@@ -157,11 +157,17 @@ export const Controls = ({ peopleLayer }: { peopleLayer: PeopleLayer }) => {
               }}
             >
               <div>
-                How many people couldn't get to their destination:{" "}
-                {(1 - peopleLayer.trips.length / peopleLayer.sample) * 100}%
+                {peopleLayer.intents.length} of {peopleLayer.sample} residents
+                simulated
               </div>
               <div>
-                Average speed of citizens:{" "}
+                How many people couldn't get to their destination:{" "}
+                {(1 - peopleLayer.trips.length / peopleLayer.intents.length) *
+                  100}
+                %
+              </div>
+              <div>
+                Average speed of residents:{" "}
                 {peopleLayer.trips
                   .map((trip) => trip.times[0])
                   .reduce((a, b) => a + b, 0) /

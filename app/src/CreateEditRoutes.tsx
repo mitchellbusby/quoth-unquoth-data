@@ -12,8 +12,10 @@ import { preProcessedStops } from "./processedTrips";
 import defaultRoutes from "./data/routes.json";
 import { SavedRouteComponent } from "./SavedRoute";
 import { StopCollection } from "./PeopleSim";
+import seedrandom from "seedrandom";
 
 function generateTrips(route: SavedRoute): TripCollection {
+  const random = seedrandom("tripgen");
   const tripSegments = route.stops
     .slice(1)
     .map(({ stopId }, idx) => [
@@ -22,18 +24,18 @@ function generateTrips(route: SavedRoute): TripCollection {
     ]);
   const tripDurations = tripSegments.map(([startId, stopId]) => {
     const d = distance(getStopLocation(startId), getStopLocation(stopId));
-    return 15 + Math.ceil(Math.random() * 5) + d * 50000;
+    return 15 + Math.ceil(random() * 5) + d * 50000;
   });
   const totalDuration = sum(tripDurations);
   const startTime = 8 * 60 * 60;
-  let trips = [];
+  let trips: Trip[] = [];
   if (route.stops[0].stopId === route.stops[route.stops.length - 1].stopId) {
     // Loop line!
     const possibleTrips = Math.ceil((24 * 60 * 60 - startTime) / totalDuration);
     let now = startTime;
     for (let i = 0; i < possibleTrips; i++) {
       trips.push({
-        stops: route.stops.map(({ stopId }) => stopId),
+        stops: route.stops.map(({ stopId }) => parseInt(stopId)),
         times: tripDurations.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]
@@ -49,7 +51,7 @@ function generateTrips(route: SavedRoute): TripCollection {
     let times = [...tripDurations];
     for (let i = 0; i < possibleTrips; i++) {
       trips.push({
-        stops: stops.map(({ stopId }) => stopId),
+        stops: stops.map(({ stopId }) => parseInt(stopId)),
         times: times.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]
@@ -59,7 +61,7 @@ function generateTrips(route: SavedRoute): TripCollection {
       stops.reverse();
       times.reverse();
       trips.push({
-        stops: stops.map(({ stopId }) => stopId),
+        stops: stops.map(({ stopId }) => parseInt(stopId)),
         times: times.reduce(
           (acc, duration) => [...acc, acc[acc.length - 1] + duration],
           [now]
@@ -92,13 +94,20 @@ const CreateEditRoutes = ({
   });
 
   useEffect(() => {
+    if (savedRoutes.routes.length === 0) {
+      // FIXME: Hack to prevent recalc on load while waiting for savedroutes to load
+      return;
+    }
+
+    const previousStopCount = Object.keys(appState.processedStops).length;
+
     // Ensure saved routes are synced to the app states
     appState.savedBusRoutes = {
       routes: savedRoutes.routes,
       trips: savedRoutes.routes.map((route) => generateTrips(route)),
     };
 
-    console.log(appState.savedBusRoutes);
+    console.log(previousStopCount);
     // todo: when I have generated trips, pre processed trips get smashed together
     // with them.
 
@@ -140,10 +149,14 @@ const CreateEditRoutes = ({
         ...customRoutesAndTrips.routes,
       },
     };
-    setTimeout(() => updateRoutes(appState.processedStops, stops), 0);
+    if (previousStopCount !== Object.keys(appState.processedStops).length) {
+      setTimeout(() => updateRoutes(appState.processedStops, stops), 0);
+    }
   }, [savedRoutes]);
 
   const handleFinishCreate = () => {
+    if (!state) return;
+
     if (state.stops.length > 0) {
       const nextSavedRoutes = cloneDeep(savedRoutes);
 
@@ -331,7 +344,7 @@ export function createRouteReducer(
       };
     }
     case "remove-stop": {
-      const stops = [...state.stops];
+      const stops = [...(state?.stops || [])];
       remove(stops, (v) => v.stopId === action.stopId);
       return { ...state, stops };
     }

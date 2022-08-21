@@ -17,7 +17,7 @@ export type AppState = {
   frameCount: number;
   dayOfWeek: string;
   busDistribution: BusDistributionType;
-  olMapRef?: React.MutableRefObject<Map>;
+  olMapRef?: React.MutableRefObject<Map | undefined>;
   savedBusRoutes: {
     routes: SavedRoute[];
     trips: TripCollection[];

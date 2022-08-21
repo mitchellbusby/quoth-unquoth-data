@@ -2,6 +2,7 @@ import allpops from "./data/allpops.json";
 import { PriorityQueue } from "@datastructures-js/priority-queue";
 import { Coordinate, distance } from "ol/coordinate";
 import { Trip, TripCollection } from "./AppState";
+import seedrandom from "seedrandom";
 
 export interface Intent {
   source: Coordinate;
@@ -11,18 +12,29 @@ export interface Intent {
   tripName: string;
 }
 
-export function getIntent(idx: number): Intent {
-  let person = allpops.people[idx];
-  const { home, destination, arrivalTime, duration } = person;
-  let source = allpops.sources[home];
-  let dest = allpops.destinations[destination];
-  return {
-    source: [source.lon, source.lat],
-    destination: [dest.lon, dest.lat],
-    arrivalTime: arrivalTime,
-    departureTime: arrivalTime + duration,
-    tripName: source.name + "-" + dest.name,
-  };
+export function getIntents(count: number): Intent[] {
+  const random = seedrandom("intents");
+  const well = [...allpops.people];
+  const intents: Intent[] = [];
+  for (let i = 0; i < count; i++) {
+    // Invariant: the first i elements are a random sample of the well
+    // The invariant is violated when elem[i] has not been sampled randomly!
+    const pick = Math.floor(random() * (well.length - i));
+    const [choice, replacement] = [well[pick], well[i]];
+    well[i] = choice;
+    well[pick] = replacement;
+    const { home, destination, arrivalTime, duration } = choice;
+    let source = allpops.sources[home];
+    let dest = allpops.destinations[destination];
+    intents.push({
+      source: [source.lon, source.lat],
+      destination: [dest.lon, dest.lat],
+      arrivalTime: arrivalTime,
+      departureTime: arrivalTime + duration,
+      tripName: source.name + "-" + dest.name,
+    });
+  }
+  return intents;
 }
 
 interface PFNode {

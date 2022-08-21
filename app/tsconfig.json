@@ -4,7 +4,6 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "lib": ["es2019", "DOM"],
-    "strictNullChecks": true
+    "lib": ["es2019", "DOM"]
   }
 }
