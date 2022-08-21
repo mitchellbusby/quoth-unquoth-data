@@ -9,6 +9,8 @@ import { AppStateContext, Trip } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
+import defaultRoutes from "./data/routes.json";
+import { SavedRouteComponent } from "./SavedRoute";
 
 function generateTrips(route: SavedRoute): TripCollection {
   const tripSegments = route.stops
@@ -94,9 +96,44 @@ const CreateEditRoutes = () => {
     console.log(appState.savedBusRoutes);
     // todo: when I have generated trips, pre processed trips get smashed together
     // with them.
+
     appState.processedStops = {
       ...preProcessedStops,
       ...appState.savedBusRoutes.trips.reduce((a, b) => ({ ...a, ...b }), {}),
+    };
+
+    const customRoutesAndTrips = {
+      trips: appState.savedBusRoutes.trips
+        .map((tripCollection, idx) =>
+          Object.keys(tripCollection).map(
+            (tripId): [string, { route: string; dir: number }] => [
+              tripId,
+              { route: appState.savedBusRoutes.routes[idx].name, dir: 0 },
+            ]
+          )
+        )
+        .flatMap((f) => f)
+        .reduce((accum, [tripId, val]) => {
+          accum[tripId] = val;
+          return accum;
+        }, {}),
+
+      routes: appState.savedBusRoutes.routes.reduce((prev, r) => {
+        prev[r.name] = { 1: `(custom)` };
+        return prev;
+      }, {}),
+    };
+
+    appState.routes = {
+      ...defaultRoutes.trips,
+      trips: {
+        ...defaultRoutes.trips,
+        ...customRoutesAndTrips.trips,
+      },
+      routes: {
+        ...defaultRoutes.routes,
+        ...customRoutesAndTrips.routes,
+      },
     };
   }, [savedRoutes]);
 
@@ -118,9 +155,22 @@ const CreateEditRoutes = () => {
   return (
     <div>
       {state ? (
-        <div>
+        <div
+          css={{
+            display: "grid",
+            gap: 8,
+          }}
+        >
           <div>Creating route {state.routeName}</div>
-          <div>Current stops:</div>
+          <div
+            css={{
+              fontSize: 14,
+            }}
+          >
+            {state.stops.length > 0
+              ? "Current stops:"
+              : "Add a stop by clicking on it on the map"}
+          </div>
           <div>
             <ol>
               {state.stops.map((stop) => (
@@ -188,43 +238,12 @@ const CreateEditRoutes = () => {
             {savedRoutes.routes.length > 0 ? (
               <div>
                 {savedRoutes.routes.map((route) => (
-                  <div key={route.name}>
-                    <div>
-                      {route.name}{" "}
-                      <Button
-                        onClick={() => {
-                          const nextSavedRoutes = cloneDeep(savedRoutes);
-                          remove(
-                            nextSavedRoutes.routes,
-                            (r) => r.name === route.name
-                          );
-                          setSavedRoutes(nextSavedRoutes);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </Button>
-                    </div>
-                    <ol>
-                      {route.stops.map((stop) => (
-                        <li key={stop.stopId}>
-                          {formatStopString(stop.stopId)}{" "}
-                          <Button
-                            onClick={() => {
-                              const stopLatLon = getStopLocation(
-                                parseInt(stop.stopId)
-                              );
-                              appState.olMapRef?.current?.getView().animate({
-                                zoom: 18,
-                                center: fromLonLat(stopLatLon),
-                              });
-                            }}
-                          >
-                            Show on map
-                          </Button>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
+                  <SavedRouteComponent
+                    key={route.name}
+                    route={route}
+                    savedRoutes={savedRoutes}
+                    setSavedRoutes={setSavedRoutes}
+                  />
                 ))}
               </div>
             ) : (
