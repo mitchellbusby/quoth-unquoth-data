@@ -10,6 +10,8 @@ export type Trip = {
   times: number[];
 };
 
+export type TripCollection = { [tripId: string]: Trip };
+
 type AppState = {
   frameCount: number;
   dayOfWeek: string;
@@ -17,7 +19,7 @@ type AppState = {
   olMapRef?: React.MutableRefObject<Map>;
   savedBusRoutes: {
     routes: SavedRoute[];
-    trips: { [tripId: string]: Trip }[];
+    trips: TripCollection[];
   };
   processedStops: {
     [tripId: string]: Trip;
