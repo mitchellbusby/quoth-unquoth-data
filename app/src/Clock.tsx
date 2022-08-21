@@ -48,6 +48,18 @@ const Clock = () => {
   const [timeOfDay, setTimeOfDay] = useState<number>(START_OF_DAY_IN_MINUTES);
   const [dayOfWeek, setDayOfWeek] = useState<string>(DEFAULT_DAY);
 
+  useEffect(() => {
+    const onKeyPress = (event) => {
+      if (event.code === "Space") {
+        setPauseClock(!pauseClock);
+      }
+    };
+    document.addEventListener("keydown", onKeyPress);
+    return () => {
+      document.removeEventListener("keydown", onKeyPress);
+    };
+  }, [pauseClock]);
+
   requestAnimationFrame(() => {
     if (!pauseClock) {
       setTimeOfDay((timeOfDay) => {
