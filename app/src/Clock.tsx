@@ -30,6 +30,15 @@ const Clock = () => {
     "clockscale",
     "large"
   );
+  const [clockSpeed, setClockSpeed] = useLocalStorage<
+    "slow" | "medium" | "fast"
+  >("clockspeed", "medium");
+
+  useEffect(() => {
+    // @ts-ignore
+    window.setClockSpeed = setClockSpeed;
+  }, []);
+
   const appState = useContext(AppStateContext);
   const [timeOfDay, setTimeOfDay] = useState<number>(START_OF_DAY_IN_MINUTES);
   const [dayOfWeek, setDayOfWeek] = useState<string>(DEFAULT_DAY);
@@ -37,7 +46,8 @@ const Clock = () => {
   requestAnimationFrame(() => {
     setTimeOfDay((timeOfDay) => {
       const tick = Date.now();
-      const nextTimeOfDay = timeOfDay + (tick - lastTick) / 16;
+      const nextTimeOfDay =
+        timeOfDay + (tick - lastTick) / speedToValue(clockSpeed);
       lastTick = tick;
 
       const overflow = nextTimeOfDay % (24 * 60 * 60);
@@ -177,5 +187,12 @@ const Clock = () => {
     </div>
   );
 };
+
+const speedToValue = (speed) =>
+  ({
+    slow: 30,
+    medium: 16,
+    fast: 8,
+  }[speed]);
 
 export { Clock };
