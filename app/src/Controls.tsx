@@ -24,7 +24,8 @@ import { distance } from "ol/coordinate";
 const ControlsElement = styled.div(() => ({
   background: "white",
   width: "300px",
-  height: "calc(100vh - 4 * var(--space-s))",
+  height: "calc(100vh - 6 * var(--space-s))",
+  overflowY: "scroll",
   position: "fixed",
   right: "var(--space-s)",
   top: "var(--space-s)",
