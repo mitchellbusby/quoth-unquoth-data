@@ -100,8 +100,9 @@ export function generateCachedTripMap(busRoutes, stops) {
 }
 
 export function pathFind(intent, busRoutes, stops, cachedTripMap) {
+    // TODO: Check if there's a direct route first.
     // Pathfind backwards...
-    const allowRadius = 0.005; // 500m
+    const allowRadius = 0.01; // 1 km
     const walkSpeed = 88650; // s/deg
     // Find the bus stops within allowRadius and calculate their edge weights.
     const frontier = new PriorityQueue((a, b) => {
@@ -146,7 +147,7 @@ export function pathFind(intent, busRoutes, stops, cachedTripMap) {
         // Find all trips that visited this bus stop already.
         let goodTrips = [];
         for (const [trip, time] of stopTripTimeMap[openNode.stopIdx]) {
-            if (time <= now && ((now - time) < 10 * 60)) {
+            if (time <= now && ((now - time) < 20 * 60)) {
                 // trip is at a good time to board
                 goodTrips.push([trip, time]);
             }
@@ -186,15 +187,3 @@ export function pathFind(intent, busRoutes, stops, cachedTripMap) {
     }
     return null;
 }
-
-        // for each neighbor of current
-        //     // d(current,neighbor) is the weight of the edge from current to neighbor
-        //     // tentative_gScore is the distance from start to the neighbor through current
-        //     tentative_gScore := gScore[current] + d(current, neighbor)
-        //     if tentative_gScore < gScore[neighbor]
-        //         // This path to neighbor is better than any previous one. Record it!
-        //         cameFrom[neighbor] := current
-        //         gScore[neighbor] := tentative_gScore
-        //         fScore[neighbor] := tentative_gScore + h(neighbor)
-        //         if neighbor not in openSet
-        //             openSet.add(neighbor)
