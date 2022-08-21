@@ -72,6 +72,7 @@ import { StyleLike } from "ol/style/Style";
 import { BusStopLayer } from "./Layers/BusStopLayer";
 import { FeatureType } from "./FeatureType";
 import { getStopLocation } from "./utils/getStopLocation";
+import { PeopleLayer } from "./Layers/PeopleLayer";
 
 const busStopStyle: StyleLike = (feature, resolution) => {
   console.log(resolution);
@@ -153,6 +154,8 @@ const OpenLayersMap = () => {
 
     const busStopLayer = new BusStopLayer();
 
+    const peopleLayer = new PeopleLayer();
+
     const osmCyclingLayer = new TileLayer({
       source: new OSM({
         url: "https://b.tile-cyclosm.openstreetmap.fr/cyclosm-lite/{z}/{x}/{y}.png",
@@ -171,6 +174,7 @@ const OpenLayersMap = () => {
         // osmCyclingLayer,
         busStopLayer.layer,
         busesLayer,
+        peopleLayer.layer,
       ],
       view: new View({
         center: center,
@@ -266,11 +270,13 @@ const OpenLayersMap = () => {
 
     map.addOverlay(popup);
     map.on("postrender", () => {
+      peopleLayer.draw(appState.frameCount);
       drawAnimatedBusesFrame();
       map.render();
     });
 
     busStopLayer.draw();
+    peopleLayer.draw(appState.frameCount);
     drawAnimatedBusesFrame();
     map.render();
 

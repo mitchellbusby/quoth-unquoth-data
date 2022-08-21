@@ -17,10 +17,10 @@ export abstract class AbstractLayer<T extends Geometry> {
   }
 
   abstract getStyle(feature: FeatureLike, resolution: number): Style;
-  abstract getFeatures(): Feature<T>[];
+  abstract getFeatures(currentTime?: number): Feature<T>[];
 
-  draw() {
+  draw(currentTime?: number) {
     this.source.clear();
-    this.source.addFeatures(this.getFeatures());
+    this.source.addFeatures(this.getFeatures(currentTime));
   }
 }
