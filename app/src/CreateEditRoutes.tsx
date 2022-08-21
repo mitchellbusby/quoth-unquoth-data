@@ -9,6 +9,7 @@ import { AppStateContext, Trip } from "./AppState";
 import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
+import defaultRoutes from "./data/routes.json";
 
 function generateTrips(route: SavedRoute): { [tripId: string]: Trip } {
   const tripSegments = route.stops
@@ -94,9 +95,43 @@ const CreateEditRoutes = () => {
     console.log(appState.savedBusRoutes);
     // todo: when I have generated trips, pre processed trips get smashed together
     // with them.
+
     appState.processedStops = {
       ...preProcessedStops,
       ...appState.savedBusRoutes.trips.reduce((a, b) => ({ ...a, ...b }), {}),
+    };
+
+    const customRoutesAndTrips = {
+      trips: appState.savedBusRoutes.trips
+        .map((tripCollection, idx) =>
+          Object.keys(tripCollection).map(
+            (tripId): [string, { route: string; dir: number }] => [
+              tripId,
+              { route: appState.savedBusRoutes.routes[idx].name, dir: 0 },
+            ]
+          )
+        )
+        .flatMap((f) => f)
+        .reduce((accum, [tripId, val]) => {
+          accum[tripId] = val;
+          return accum;
+        }, {}),
+      routes: appState.savedBusRoutes.routes.reduce((prev, r) => {
+        prev[r.name] = { 1: `(custom)` };
+        return prev;
+      }, {}),
+    };
+
+    appState.routes = {
+      ...defaultRoutes.trips,
+      trips: {
+        ...defaultRoutes.trips,
+        ...customRoutesAndTrips.trips,
+      },
+      routes: {
+        ...defaultRoutes.routes,
+        ...customRoutesAndTrips.routes,
+      },
     };
   }, [savedRoutes]);
 

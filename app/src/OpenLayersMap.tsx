@@ -15,7 +15,7 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
-import {getIntent, pathFind, generateCachedTripMap} from "./PeopleSim";
+import { getIntent, pathFind, generateCachedTripMap } from "./PeopleSim";
 window.getIntent = getIntent;
 window.pathFind = pathFind;
 window.generateCachedTripMap = generateCachedTripMap;
@@ -288,9 +288,12 @@ const OpenLayersMap = () => {
           popup.setPosition((feature.getGeometry() as Point).getCoordinates());
           const tripId = feature.get("tripId");
 
-          const routeNumber = getRouteNumberFromId(tripId);
+          const routeNumber = getRouteNumberFromId(tripId, appState.routes);
 
-          const routeName = getRouteNameFromNumber(routeNumber);
+          const routeName = getRouteNameFromNumber(
+            routeNumber,
+            appState.routes
+          );
           popupRef.current.innerText = `${routeNumber}: ${routeName}`;
 
           popup.set("tripId", tripId);
