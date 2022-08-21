@@ -155,9 +155,22 @@ const CreateEditRoutes = () => {
   return (
     <div>
       {state ? (
-        <div>
+        <div
+          css={{
+            display: "grid",
+            gap: 8,
+          }}
+        >
           <div>Creating route {state.routeName}</div>
-          <div>Current stops:</div>
+          <div
+            css={{
+              fontSize: 14,
+            }}
+          >
+            {state.stops.length > 0
+              ? "Current stops:"
+              : "Add a stop by clicking on it on the map"}
+          </div>
           <div>
             <ol>
               {state.stops.map((stop) => (
