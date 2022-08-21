@@ -17,12 +17,7 @@ export class BusStopLayer extends AbstractLayer<Geometry> {
   constructor() {
     super();
 
-    this.source = new VectorSource();
-    this.layer = new VectorLayer({
-      source: this.source,
-      style: this.getStyle,
-      minZoom: 14,
-    });
+    this.layer.setMinZoom(14);
   }
 
   getStyle() {
@@ -32,8 +27,8 @@ export class BusStopLayer extends AbstractLayer<Geometry> {
     });
   }
 
-  draw() {
-    const features = Object.keys(stops).map((stop) => {
+  getFeatures() {
+    return Object.keys(stops).map((stop) => {
       const stopLocation = getStopLocation(parseInt(stop));
       const stopName = stops[stop].name;
 
@@ -44,6 +39,5 @@ export class BusStopLayer extends AbstractLayer<Geometry> {
         stopName,
       });
     });
-    this.source.addFeatures(features);
   }
 }
