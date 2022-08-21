@@ -15,7 +15,7 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import { Style, Icon } from "ol/style";
 
-import {getIntent, pathFind, generateCachedTripMap} from "./PeopleSim";
+import { getIntent, pathFind, generateCachedTripMap } from "./PeopleSim";
 window.getIntent = getIntent;
 window.pathFind = pathFind;
 window.generateCachedTripMap = generateCachedTripMap;

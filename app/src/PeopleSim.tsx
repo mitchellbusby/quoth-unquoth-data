@@ -1,9 +1,9 @@
 import allpops from "./data/allpops.json";
 import { PriorityQueue } from "@datastructures-js/priority-queue";
 import { Coordinate, distance } from "ol/coordinate";
-import { TripCollection } from "./AppState";
+import { Trip, TripCollection } from "./AppState";
 
-interface Intent {
+export interface Intent {
   source: Coordinate;
   destination: Coordinate;
   arrivalTime: number;
@@ -64,13 +64,15 @@ function indexOfMin(arr: number[]) {
   return minIndex;
 }
 
-function reconstruct(node: PFNodeStop | undefined) {
-  let nodes: number[] = [];
+function reconstruct(node: PFNodeStop | undefined): Trip {
+  let stops: number[] = [];
+  let times: number[] = [];
   while (node !== undefined) {
-    nodes.push(node.stopIdx);
+    stops.push(node.stopIdx);
+    times.push(node.g);
     node = node.parent as PFNodeStop | undefined;
   }
-  return nodes;
+  return { stops, times };
 }
 /*
 function hasNode(nodes, node) {
@@ -82,7 +84,7 @@ function hasNode(nodes, node) {
   return false;
 } */
 
-type StopCollection = {
+export type StopCollection = {
   [stopId: number]: {
     name: string;
     lat: number;
@@ -92,7 +94,7 @@ type StopCollection = {
 
 type TripTime = [string, number];
 
-type TripTimeMap = { [stopId: number]: TripTime[] };
+export type TripTimeMap = { [stopId: number]: TripTime[] };
 
 export function generateCachedTripMap(
   busRoutes: TripCollection,

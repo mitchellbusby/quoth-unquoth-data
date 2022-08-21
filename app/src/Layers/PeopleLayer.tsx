@@ -5,99 +5,77 @@ import { Point } from "ol/geom";
 import Geometry from "ol/geom/Geometry";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { Circle, Fill, Style } from "ol/style";
+import { Trip, TripCollection } from "../AppState";
 import { FeatureType } from "../FeatureType";
-import { getIntent } from "../PeopleSim";
+import {
+  generateCachedTripMap,
+  getIntent,
+  Intent,
+  pathFind,
+  StopCollection,
+  TripTimeMap,
+} from "../PeopleSim";
+import { getStopLocation } from "../utils/getStopLocation";
 import { AbstractLayer } from "./AbstractLayer";
 
 export class PeopleLayer extends AbstractLayer<Geometry> {
-  constructor() {
+  intents: Intent[];
+  cachedTripMap: TripTimeMap;
+  trips: Trip[];
+
+  constructor(routes: TripCollection, stops: StopCollection) {
     super();
-    this.layer.setMinZoom(14);
+    const peopleCount = range(0, 100);
+    this.cachedTripMap = generateCachedTripMap(routes, stops);
+    this.intents = peopleCount.map((id) => getIntent(id));
+    this.trips = this.intents
+      .map((intent) => pathFind(intent, routes, stops, this.cachedTripMap))
+      .filter((x) => x !== undefined) as Trip[];
+    console.log(this.trips);
   }
+
   getStyle(feature: FeatureLike, resolution: number): Style {
     return new Style({
       image: new Circle({
-        radius: 10,
+        radius: 5,
         fill: new Fill({ color: "red" }),
       }),
     });
   }
 
   getFeatures(currentTime?: number): Feature<Geometry>[] {
-    const peopleCount = range(0, 20);
+    if (!currentTime) {
+      return [];
+    }
+    return this.trips
+      .map(({ stops, times }) => {
+        const where = times.filter((time) => currentTime >= time);
+        if (where.length > 0 && where.length < times.length) {
+          const [startTime, endTime] = [
+            times[where.length - 1],
+            times[where.length],
+          ];
+          const [startLoc, endLoc] = [
+            getStopLocation(stops[where.length - 1]),
+            getStopLocation(stops[where.length]),
+          ];
 
-    return peopleCount
-      .map((personIndex) => {
-        const personData = getIntent(personIndex);
-        const {
-          // todo: switch these when I'm done testing
-          departureTime,
-          arrivalTime,
-          source: startLoc,
-          destination: endLoc,
-        } = personData;
-
-        /**
-         * get distance between source and destination
-         * (could use open layers for this)
-         * multiply it by some number
-         * then back track to get the time to leave for arrival,
-         * and forward track to get time to arrive for departure
-         */
-
-        let lerpedCoordinate;
-
-        const tripToDestination = {
-          startTime: arrivalTime - distance(startLoc, endLoc) * 10000,
-          endTime: arrivalTime,
-        };
-
-        if (
-          currentTime <= tripToDestination.endTime &&
-          currentTime >= tripToDestination.startTime
-        ) {
-          const { startTime, endTime } = tripToDestination;
-          // we can do a lerp
-          lerpedCoordinate = fromLonLat(
+          const lerpedCoordinate = fromLonLat(
             interpolate(
               startLoc,
               endLoc,
               (currentTime - startTime) / (endTime - startTime)
             )
           );
+
+          return new Feature({
+            geometry: new Point(lerpedCoordinate),
+            type: FeatureType.Person,
+          });
         }
-        // add return trip
-
-        // console.log(startTime, endTime, currentTime);
-
-        // if (currentTime >= endTime || currentTime <= startTime) {
-        //   return undefined;
-        // }
-
-        // // start with arriving at the destination
-
-        // const lerpedCoordinate = fromLonLat(
-        //   interpolate(
-        //     startLoc,
-        //     endLoc,
-        //     (currentTime - startTime) / (endTime - startTime)
-        //   )
-        // );
-
-        if (!lerpedCoordinate) {
-          return;
-        }
-
-        console.log("person drawn!!!!", currentTime);
-
-        const personFeature = new Feature({
-          geometry: new Point(lerpedCoordinate),
-          type: FeatureType.Person,
-        });
-
-        return personFeature;
+        return undefined;
       })
-      .filter((x) => x);
+      .filter((x) => x) as Feature<Point>[];
   }
 }
 

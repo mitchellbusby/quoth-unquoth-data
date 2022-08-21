@@ -10,7 +10,7 @@ import { Button } from "./components/Button";
 import stops from "./data/stops.json";
 import { preProcessedStops } from "./processedTrips";
 
-function generateTrips(route: SavedRoute): { [tripId: string]: Trip } {
+function generateTrips(route: SavedRoute): TripCollection {
   const tripSegments = route.stops
     .slice(1)
     .map(({ stopId }, idx) => [
