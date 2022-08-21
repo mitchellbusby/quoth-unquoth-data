@@ -105,7 +105,7 @@ const CreateEditRoutes = () => {
                   </div>
                   <ol>
                     {route.stops.map((stop) => (
-                      <li>
+                      <li key={stop.stopId}>
                         {formatStopString(stop.stopId)}{" "}
                         <Button
                           onClick={() => {
