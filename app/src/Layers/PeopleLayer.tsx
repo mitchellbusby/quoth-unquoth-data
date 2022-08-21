@@ -25,12 +25,20 @@ export class PeopleLayer extends AbstractLayer<Geometry> {
 
   constructor(routes: TripCollection, stops: StopCollection) {
     super();
-    const peopleCount = range(0, 100);
+    const peopleCount = range(0, 1000);
     this.cachedTripMap = generateCachedTripMap(routes, stops);
     this.intents = peopleCount.map((id) => getIntent(id));
     this.trips = this.intents
-      .map((intent) => pathFind(intent, routes, stops, this.cachedTripMap))
-      .filter((x) => x !== undefined) as Trip[];
+      .map((intent) => {
+        const path = pathFind(intent, routes, stops, this.cachedTripMap);
+        if (!path) {
+          return;
+        }
+        const startTime =
+          intent.arrivalTime - path.times.reduce((a, b) => a + b, 0);
+        return { ...path, times: path.times.map((time) => startTime + time) };
+      })
+      .filter((x) => x) as Trip[];
     console.log(this.trips);
   }
 

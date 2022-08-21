@@ -154,7 +154,7 @@ const OpenLayersMap = () => {
 
     const busStopLayer = new BusStopLayer();
 
-    const peopleLayer = new PeopleLayer();
+    const peopleLayer = new PeopleLayer(appState.processedStops, stops);
 
     const osmCyclingLayer = new TileLayer({
       source: new OSM({
