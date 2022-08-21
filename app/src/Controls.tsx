@@ -131,7 +131,19 @@ export const Controls = () => {
             </div>
           </>
         )}
-        {currentTab === "stats" && <div>Add your stats here</div>}
+        {currentTab === "stats" && (
+          <div>
+            <div>City statistics</div>
+            <div
+              css={{
+                fontSize: 14,
+              }}
+            >
+              <div>How many people couldn't get to their destination: </div>
+              <div>Average speed of citizens: </div>
+            </div>
+          </div>
+        )}
       </ControlsElement>
       <ClassNames>
         {({ css }) => (
