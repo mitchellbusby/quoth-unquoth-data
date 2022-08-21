@@ -321,7 +321,7 @@ const OpenLayersMap = () => {
     return () => {
       map.dispose();
     };
-  }, [mapRef.current, popupRef.current]);
+  }, []);
 
   useEffect(() => {
     appState.olMapRef = olMapRef;
